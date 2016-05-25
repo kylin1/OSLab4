@@ -14,7 +14,7 @@
 #include "include/proc.h"
 #include "include/global.h"
 
-
+//声明进程表,NR_TASKS是最大允许进程数目
 PUBLIC	PROCESS			proc_table[NR_TASKS];
 
 PUBLIC	char			task_stack[STACK_SIZE_TOTAL];

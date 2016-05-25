@@ -10,6 +10,7 @@
 #include "include/protect.h"
 #include "include/proto.h"
 #include "include/proc.h"
+#include "include/string.h"
 #include "include/global.h"
 
 
@@ -162,6 +163,8 @@ PUBLIC void init_prot()
 	init_idt_desc(INT_VECTOR_SYS_CALL,	DA_386IGate,
 		      sys_call,			PRIVILEGE_USER);
 
+	//第二步,准备GDT中的TSS和LDT两个描述符,初始化TSS
+
 	/* 填充 GDT 中 TSS 这个描述符 */
 	memset(&tss, 0, sizeof(tss));
 	tss.ss0		= SELECTOR_KERNEL_DS;
@@ -175,7 +178,7 @@ PUBLIC void init_prot()
 	int i;
 	PROCESS* p_proc	= proc_table;
 	u16 selector_ldt = INDEX_LDT_FIRST << 3;
-	for(i=0;i<NR_TASKS;i++){
+	for (i = 0; i < NR_TASKS; i++) {
 		init_descriptor(&gdt[selector_ldt>>3],
 				vir2phys(seg2phys(SELECTOR_KERNEL_DS),
 					proc_table[i].ldts),

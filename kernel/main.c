@@ -6,11 +6,11 @@
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include <string.h>
+#include "include/string.h"
 #include "include/type.h"
 #include "include/const.h"
 #include "include/protect.h"
 #include "include/proto.h"
-#include "include/string.h"
 #include "include/proc.h"
 #include "include/global.h"
 
@@ -22,6 +22,7 @@ PUBLIC int kernel_main()
 {
 	disp_str("-----\"kernel_main\" begins-----\n");
 
+	//第三步,初始化进程表
 	TASK*		p_task		= task_table;
 	PROCESS*	p_proc		= proc_table;
 	char*		p_task_stack	= task_stack + STACK_SIZE_TOTAL;
@@ -39,8 +40,12 @@ PUBLIC int kernel_main()
 		memcpy(&p_proc->ldts[1], &gdt[SELECTOR_KERNEL_DS >> 3],
 		       sizeof(DESCRIPTOR));
 		p_proc->ldts[1].attr1 = DA_DRW | PRIVILEGE_TASK << 5;
+
+		//cs指向LDT中第一个描述符
 		p_proc->regs.cs	= ((8 * 0) & SA_RPL_MASK & SA_TI_MASK)
 			| SA_TIL | RPL_TASK;
+
+		//ds,es,fs,ss都指向LDT中第二个描述符
 		p_proc->regs.ds	= ((8 * 1) & SA_RPL_MASK & SA_TI_MASK)
 			| SA_TIL | RPL_TASK;
 		p_proc->regs.es	= ((8 * 1) & SA_RPL_MASK & SA_TI_MASK)
@@ -49,14 +54,19 @@ PUBLIC int kernel_main()
 			| SA_TIL | RPL_TASK;
 		p_proc->regs.ss	= ((8 * 1) & SA_RPL_MASK & SA_TI_MASK)
 			| SA_TIL | RPL_TASK;
+		//gs还是指向显存
 		p_proc->regs.gs	= (SELECTOR_KERNEL_GS & SA_RPL_MASK)
 			| RPL_TASK;
 
+		//eip指向initial_eip
 		p_proc->regs.eip = (u32)p_task->initial_eip;
+		//esp指向单独的栈,大小为STACK_SIZE_TOTAL
 		p_proc->regs.esp = (u32)p_task_stack;
+		//设置eflags:使得进程可以使用I/O指令,IF=1,中断会在iretd执行的时候被打开
 		p_proc->regs.eflags = 0x1202; /* IF=1, IOPL=1 */
 
 		p_task_stack -= p_task->stacksize;
+		//指向下一个进程
 		p_proc++;
 		p_task++;
 		selector_ldt += 1 << 3;
@@ -79,6 +89,8 @@ PUBLIC int kernel_main()
         put_irq_handler(CLOCK_IRQ, clock_handler); /* 设定时钟中断处理程序 */
         enable_irq(CLOCK_IRQ);                     /* 让8259A可以接收时钟中断 */
 
+	//ring0 到 ring1的跳转
+	//第四部,调用kernel.asm的restart函数
 	restart();
 
 	while(1){}
@@ -86,8 +98,10 @@ PUBLIC int kernel_main()
 
 /*======================================================================*
                                TestA
-                       第一步,准备一个小的进程体
+
  *======================================================================*/
+//第一步,准备一个小的进程体
+//进程体在内核被LOADER放置到内存之后就准备好了
 void TestA()
 {
 	int i = 0;

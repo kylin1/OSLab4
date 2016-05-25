@@ -136,12 +136,13 @@ csinit:		; “这个跳转指令强制使用刚刚初始化的结构”——<<O
 	;jmp 0x40:0
 	;ud2
 
-
+    ;加载tr的代码
 	xor	eax, eax
 	mov	ax, SELECTOR_TSS
-	ltr	ax
+	ltr	ax    ;装载任务状态段寄存器TR,使其指向已预置好的任务的TSS
+	;从GDT中取出相应的TSS段描述符，把TSS段描述符的基地址和界限等信息装入TR的高速缓冲寄存器中
 
-	;sti
+	;sti 启动main.c的kernel_main函数,启动线程
 	jmp	kernel_main
 
 	;hlt
@@ -169,7 +170,7 @@ csinit:		; “这个跳转指令强制使用刚刚初始化的结构”——<<O
 
 
 ALIGN	16
-hwint00:		; Interrupt routine for irq 0 (the clock).
+hwint00:		;让时钟中断可以不停地发生而不是一次 Interrupt routine for irq 0 (the clock).
 	hwint_master	0
 
 ALIGN	16
@@ -355,6 +356,7 @@ sys_call:
 ;				    restart
 ; ====================================================================================
 restart:
+    ;这里的选择子必须与protect.h中的值保持一致
     ;p_proc_ready = proc_table,是进程表指针指向下一个要启动的进程表的地址
 	mov	esp, [p_proc_ready]
 
@@ -375,5 +377,18 @@ restart_reenter:
 	pop	ds
 	popad                             ;返回了更多寄存器(pushed by save())
 	add	esp, 4                        ;将esp+4,跳过了u32 retaddr,以便执行下一行中断返回指令
-	iretd                             ;恢复寄存器:pushed by CPU during interrupt, ring0 -> ring1的转移,向外跳转
+	iretd        ;恢复寄存器:pushed by CPU during interrupt, ring0 -> ring1的转移,向外跳转
+    ;最后一行指令后,eflags中的值会变成proc -> regs.eflags中的值
+    ;由于预先设置了IF位,所以进程开始运行的时候,中段已经被打开了
 
+    ;ring0 -> ring1系统到用户,堆栈切换在这里完成,各种寄存器从堆栈获取
+    ;内层堆栈指针存放在当前任务的TSS中,从内层向外层转移时不需要访问TSS，
+    ;而只需内层栈中保存的栈指针
+
+    ;但ring1 -> ring0用户到系统(内核态)切换就要使用TSS,使用TSS保存ring0的堆栈信息
+    ;外层堆栈指针保存在内层堆栈中,在从外层向内层变换时，要访问TSS
+
+    ;进程在被中断切换到内核态的时候,当前的各个寄存器应该立刻被压栈
+    ;也就是说,每个进程在运行的时候,tss.esp0应该是当前进程表中保存寄存器值的地方
+    ;这个地方也就是s_proc结构体中s_stackfrme的最高地址处(regs最高处)
+    ;这样,进程被挂起后才恰好保存寄存器到正确的位置

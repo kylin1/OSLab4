@@ -16,7 +16,7 @@ extern	spurious_irq
 extern	clock_handler
 extern	disp_str
 extern	delay
-extern	irq_table
+extern	irq_table ;global.c : PUBLIC	irq_handler		irq_table[NR_IRQ];
 
 ; 导入全局变量
 extern	gdt_ptr
@@ -149,23 +149,33 @@ csinit:		; “这个跳转指令强制使用刚刚初始化的结构”——<<O
 
 
 ; 中断和异常 -- 硬件中断
+; 使用宏避免了函数的压栈出栈,节省了时间,但是空间上有浪费
+; 以空间换取时间
 ; ---------------------------------
 %macro	hwint_master	1
-	call	save
+	call	save            ;保存中断处理状态,寄存器的值
+	;call函数无法使用ret返回是因为函数调用前后esp的值是完全不同的
+	;必须事先将返回地址保存起来,最后使用jmp指令跳转回去
+
 	in	al, INT_M_CTLMASK	; `.
 	or	al, (1 << %1)		;  | 屏蔽当前中断
-	out	INT_M_CTLMASK, al	; /
-	mov	al, EOI			; `. 置EOI位
+	out	INT_M_CTLMASK, al	; /  避免在处理当前中断的同事发生同样种类的中断
+
+	mov	al, EOI			    ; `. 置EOI位,中断结束命令
 	out	INT_M_CTL, al		; /
-	sti	; CPU在响应中断的过程中会自动关中断，这句之后就允许响应新的中断
-	push	%1			; `.
+
+	sti	                    ; CPU在响应中断的过程中会自动关中断，这句之后就允许响应新的中断
+
+	push	%1			            ; `.
 	call	[irq_table + 4 * %1]	;  | 中断处理程序
-	pop	ecx			; /
-	cli
+	pop	ecx			                ; /  这是与当前中断相关的一个例程
+
+	cli                     ;关闭中断
+
 	in	al, INT_M_CTLMASK	; `.
 	and	al, ~(1 << %1)		;  | 恢复接受当前中断
 	out	INT_M_CTLMASK, al	; /
-	ret
+	ret                     ;要跳转到 _restart处
 %endmacro
 
 
@@ -318,19 +328,33 @@ save:
         push    es      ;  | 保存原寄存器值
         push    fs      ;  |
         push    gs      ; /
-        mov     dx, ss
+
+        mov     dx, ss  ;让ds = es = ss
         mov     ds, dx
         mov     es, dx
 
         mov     esi, esp                    ;esi = 进程表起始地址
 
         inc     dword [k_reenter]           ;k_reenter++;
-        cmp     dword [k_reenter], 0        ;if(k_reenter ==0)
-        jne     .1                          ;{
-        mov     esp, StackTop               ;  mov esp, StackTop <--切换到内核栈
+        cmp     dword [k_reenter], 0        ;if(k_reenter ==0)如果中断重入,执行.1
+        jne     .1                          ;{ mov     esp, StackTop
+
+        ;否则不是重入顺序执行
+        mov     esp, StackTop               ;  esp切换到内核栈
         push    restart                     ;  push restart
-        jmp     [esi + RETADR - P_STACKBASE];  return;
-.1:                                         ;} else { 已经在内核栈，不需要再切换
+
+
+        ;P_STACKBASE = 0 RETADR在寄存器后面
+        ;RETADR - P_STACKBASE是执行call save这条指令的时候
+        ;压栈的返回地址相对于进程表起始地址的偏移
+        ;也就是从save 函数返回,继续从in	al, INT_M_CTLMASK开始执行
+        ;也就是return
+
+        jmp     [esi + RETADR - P_STACKBASE];
+
+
+.1:                                         ;} else {
+        ;中断重入:已经在内核栈，不需要再切换
         push    restart_reenter             ;  push restart_reenter
         jmp     [esi + RETADR - P_STACKBASE];  return;
                                             ;}
@@ -344,11 +368,15 @@ sys_call:
 
         sti
 
+        ;调用sys_call_table的一个函数
+        ;(里面存放了函数名,函数指针数组,例如sys_get_ticks)
         call    [sys_call_table + eax * 4]
+
+        ;把函数 [sys_call_table + eax * 4]的返回值
+        ;放在进程表中eax的位置,以便进程P被恢复执行的时候eax中是正确的返回值
         mov     [esi + EAXREG - P_STACKBASE], eax
 
         cli
-
         ret
 
 
@@ -361,6 +389,7 @@ restart:
 	mov	esp, [p_proc_ready]
 
 	;设置LDT,P_LDT_SE  equ P_STACKTOP  esp + P_LDT_SEL指向s_proc结构体中的成员ldt_sel,ldt_sel被别的地方,restart函数之前初始化,以便lldt这一行可以正确执行
+	;每一个进程都有自己的LDT,所以进程切换的时候需要重新加载ldt
 	lldt	[esp + P_LDT_SEL]
 
 	;将s_proc结构体中的第一个成员regs的末地址赋给下面的数值
@@ -392,3 +421,5 @@ restart_reenter:
     ;也就是说,每个进程在运行的时候,tss.esp0应该是当前进程表中保存寄存器值的地方
     ;这个地方也就是s_proc结构体中s_stackfrme的最高地址处(regs最高处)
     ;这样,进程被挂起后才恰好保存寄存器到正确的位置
+
+    ;进程X想要获得CPU之前,tss.esp0的值就会被修改为进程表X中相应的位置

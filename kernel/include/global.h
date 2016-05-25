@@ -16,15 +16,17 @@
 #define	EXTERN
 #endif
 
+//全局使用的ticks,表示系统调用的次数
 EXTERN	int		ticks;
 
 EXTERN	int		disp_pos;
+
 EXTERN	u8		gdt_ptr[6];	// 0~15:Limit  16~47:Base
 EXTERN	DESCRIPTOR	gdt[GDT_SIZE];
 EXTERN	u8		idt_ptr[6];	// 0~15:Limit  16~47:Base
 EXTERN	GATE		idt[IDT_SIZE];
 
-EXTERN	u32		k_reenter;
+EXTERN	u32		k_reenter; //代表现在是否中断重入
 
 EXTERN	TSS		tss;
 EXTERN	PROCESS*	p_proc_ready;//p_proc_ready是一个结构体类型指针

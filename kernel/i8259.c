@@ -12,6 +12,7 @@
 #include "include/proto.h"
 #include "include/proc.h"
 #include "include/global.h"
+#include "lib/klib.h"
 
 
 /*======================================================================*
@@ -27,10 +28,13 @@ PUBLIC void init_8259A()
 	out_byte(INT_S_CTLMASK,	0x2);			// Slave  8259, ICW3. 对应 '主8259' 的 IR2.
 	out_byte(INT_M_CTLMASK,	0x1);			// Master 8259, ICW4.
 	out_byte(INT_S_CTLMASK,	0x1);			// Slave  8259, ICW4.
-	//开启时钟中断
+
+	//对中断的接受处理由disable_irq & enable_irq处理
+	//下面屏蔽所有的中断
 	out_byte(INT_M_CTLMASK,	0xFF);	// Master 8259, OCW1. 
 	out_byte(INT_S_CTLMASK,	0xFF);	// Slave  8259, OCW1.
 
+	//中断处理程序先使用伪造的
 	int i;
 	for (i = 0; i < NR_IRQ; i++) {
 		irq_table[i] = spurious_irq;
@@ -53,5 +57,6 @@ PUBLIC void spurious_irq(int irq)
 PUBLIC void put_irq_handler(int irq, irq_handler handler)
 {
 	disable_irq(irq);
+	//为irq_table第irq个数值赋值
 	irq_table[irq] = handler;
 }

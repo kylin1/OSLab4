@@ -37,25 +37,30 @@ typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 //进程的状态被放在s_proc这个结构体中,也就是进程表
 //要恢复一个进程时,将esp指针指向这个结构体的开始出,然后一系列pop将寄存器的数值弹出
 typedef struct s_proc {
-	STACK_FRAME regs;          /* 前部分是所有相关寄存器的数值
- 								* process registers saved in stack frame */
+
+	//前部分是所有相关寄存器的数值 process registers saved in stack frame
+	STACK_FRAME regs;
 
 	//GDT一个选择子(内含描述符索引,可得到描述符),给出了进程LDT表的基址与段限
-	u16 ldt_sel;               /* gdt selector giving ldt base and limit */
+	u16 ldt_sel;
 
-	//进程LDT表
-	DESCRIPTOR ldts[LDT_SIZE]; /* local descriptors for code and data */
+	//进程LDT表 local descriptors for code and data
+	DESCRIPTOR ldts[LDT_SIZE];
 
-        int ticks;                 /* remained ticks */
-        int priority;
 
-	u32 pid;                   /* process id passed in from MM */
-	char p_name[16];           /* name of the process */
+	//remained ticks
+	int ticks;
+	int priority;
+	//process id passed in from MM
+	u32 pid;
+	//name of the process
+	char p_name[16];
+
 }PROCESS;
 
 typedef struct s_task {
-	task_f	initial_eip;
-	int	stacksize;
+	task_f	initial_eip; //函数指针
+	int		stacksize;
 	char	name[32];
 }TASK;
 

@@ -44,5 +44,6 @@ PUBLIC  int     sys_get_ticks();        /* sys_call */
 
 /* syscall.asm */
 PUBLIC  void    sys_call();             /* int_handler */
+
 PUBLIC  int     get_ticks();
 

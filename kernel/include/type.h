@@ -16,6 +16,7 @@ typedef	unsigned char		u8;
 
 typedef	void	(*int_handler)	();
 typedef	void	(*task_f)	();
+// irq_handler --> PUBLIC void clock_handler(int irq)
 typedef	void	(*irq_handler)	(int irq);
 
 typedef void*	system_call;

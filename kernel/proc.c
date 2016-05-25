@@ -22,9 +22,13 @@ PUBLIC void schedule()
 	int	 greatest_ticks = 0;
 
 	while (!greatest_ticks) {
+
+		//对于每一个进程
 		for (p = proc_table; p < proc_table+NR_TASKS; p++) {
 			if (p->ticks > greatest_ticks) {
 				greatest_ticks = p->ticks;
+
+				//下一个进程设为p
 				p_proc_ready = p;
 			}
 		}

@@ -12,6 +12,8 @@
 #include "include/proc.h"
 #include "include/string.h"
 #include "include/global.h"
+#include "lib/klib.h"
+#include "include/i8259.h"
 
 
 /* 本文件内函数声明 */
@@ -61,8 +63,10 @@ void	hwint15();
  *======================================================================*/
 PUBLIC void init_prot()
 {
+	//初始化中断端口8259A
 	init_8259A();
 
+	//初始化IDT
 	// 全部初始化成中断门(没有陷阱门)
 	init_idt_desc(INT_VECTOR_DIVIDE,	DA_386IGate,
 		      divide_error,		PRIVILEGE_KRNL);
@@ -160,6 +164,8 @@ PUBLIC void init_prot()
         init_idt_desc(INT_VECTOR_IRQ8 + 7,      DA_386IGate,
                       hwint15,                  PRIVILEGE_KRNL);
 
+	//初始化得到tickets的中断门,将INT_VECTOR_SYS_CALL(90)与sys_call对应起来
+	//sys_call: call    [sys_call_table + eax * 4]
 	init_idt_desc(INT_VECTOR_SYS_CALL,	DA_386IGate,
 		      sys_call,			PRIVILEGE_USER);
 
@@ -176,9 +182,13 @@ PUBLIC void init_prot()
 
 	// 填充 GDT 中进程的 LDT 的描述符
 	int i;
+	//进程表指针
 	PROCESS* p_proc	= proc_table;
 	u16 selector_ldt = INDEX_LDT_FIRST << 3;
+
+	//对于每一个进程
 	for (i = 0; i < NR_TASKS; i++) {
+		//初始化这个进程里面的内容,解决what的问题
 		init_descriptor(&gdt[selector_ldt>>3],
 				vir2phys(seg2phys(SELECTOR_KERNEL_DS),
 					proc_table[i].ldts),

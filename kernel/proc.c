@@ -38,13 +38,14 @@ PUBLIC void schedule()
 		}
 		//循环结束之后,下一个进程就是剩余ticks最大的进程
 
-//		//当剩余最大的ticks就是0了,所有的进程都需要再次分配
-//		if (!greatest_ticks) {
-//			for (p = proc_table; p < proc_table+NR_TASKS; p++) {
-//				//ticks设置为初始值
-//				p->ticks = p->priority;
-//			}
-//		}
+		//下面的代码会导致系统无限循环打印ABC而一段时间后产生异常
+		//当剩余最大的ticks就是0了,所有的进程都需要再次分配
+		if (!greatest_ticks) {
+			for (p = proc_table; p < proc_table+NR_TASKS; p++) {
+				//ticks设置为初始值
+				p->ticks = p->priority;
+			}
+		}
 	}
 }
 

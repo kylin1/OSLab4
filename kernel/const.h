@@ -64,6 +64,7 @@
 #define	AT_WINI_IRQ	14	/* at winchester */
 
 /* system call */
-#define NR_SYS_CALL     1
+//添加系统调用之2:修改全局变量系统调用的数量
+#define NR_SYS_CALL     5
 
 #endif /* _ORANGES_CONST_H_ */

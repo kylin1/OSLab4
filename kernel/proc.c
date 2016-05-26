@@ -51,8 +51,34 @@ PUBLIC void schedule()
 /*======================================================================*
                            sys_get_ticks
  *======================================================================*/
-PUBLIC int sys_get_ticks()
-{
+PUBLIC int sys_get_ticks() {
 	return ticks;
 }
 
+/**
+ * 调用此 System Call 的进程会在 mill_seconds 毫秒内不被进程调度函数分配时间片
+ */
+PUBLIC int sys_process_sleep(int mill_seconds) {
+	return 11;
+}
+
+/**
+ * 接受一个 char* str 参数, 打印出 字符串
+ */
+PUBLIC int sys_disp_str(char* str){
+	return 22;
+}
+
+/**
+ * 信号量的 PV 操作
+ */
+PUBLIC int sys_sem_p(){
+	return 33;
+}
+
+/**
+ * 信号量的 PV 操作
+ */
+PUBLIC int sys_sem_v(){
+	return 44;
+}

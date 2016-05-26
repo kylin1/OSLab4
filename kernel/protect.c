@@ -12,6 +12,8 @@
 #include "proto.h"
 #include "proc.h"
 #include "global.h"
+#include "string.h"
+#include "klib.h"
 
 
 /* 本文件内函数声明 */
@@ -166,7 +168,10 @@ PUBLIC void init_prot()
 	//将INT_VECTOR_SYS_CALL = 90与sys_call对应起来
 
 	//sys_call: call    [sys_call_table + eax * 4]
-	//也就是调用globcal.c里面的第eax个函数进行对应处理
+	//也就是调用globcal.c里面的sys_call_table的第eax个函数进行对应处理
+
+	//					char vector, u8 desc_type,
+	// 		int_handler handler,unsigned char privilege)
 	init_idt_desc(INT_VECTOR_SYS_CALL,	DA_386IGate,
 		      sys_call,			PRIVILEGE_USER);
 

@@ -138,7 +138,7 @@ void TestA()
 {
 	int i = 0;
 	while (1) {
-		disp_str("A.");
+		disp_str("Aa.");
 		milli_delay(10);
 	}
 }

@@ -5,10 +5,13 @@
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#include "include/type.h"
-#include "include/const.h"
-#include "include/proto.h"
-#include "include/global.h"
+#include "type.h"
+#include "const.h"
+#include "protect.h"
+#include "proto.h"
+#include "string.h"
+#include "proc.h"
+#include "global.h"
 
 
 /*======================================================================*

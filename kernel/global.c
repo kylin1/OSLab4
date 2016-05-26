@@ -7,12 +7,12 @@
 
 #define GLOBAL_VARIABLES_HERE
 
-#include "include/type.h"
-#include "include/const.h"
-#include "include/protect.h"
-#include "include/proto.h"
-#include "include/proc.h"
-#include "include/global.h"
+#include "type.h"
+#include "const.h"
+#include "protect.h"
+#include "proto.h"
+#include "proc.h"
+#include "global.h"
 
 //声明进程表,NR_TASKS是最大允许进程数目
 PUBLIC	PROCESS			proc_table[NR_TASKS];

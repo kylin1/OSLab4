@@ -5,15 +5,13 @@
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#include "include/type.h"
-#include "include/const.h"
-#include "include/protect.h"
-#include "include/proto.h"
-#include "include/proc.h"
-#include "include/string.h"
-#include "include/global.h"
-#include "lib/klib.h"
-#include "include/i8259.h"
+
+#include "type.h"
+#include "const.h"
+#include "protect.h"
+#include "proto.h"
+#include "proc.h"
+#include "global.h"
 
 
 /* 本文件内函数声明 */

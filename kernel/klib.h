@@ -2,7 +2,7 @@
 // Created by 王梦麟 on 16/5/25.
 //
 
-#include "../include/const.h"
+#include "const.h"
 
 #ifndef MULTIPLEPROCESS_KLIB_H
 #define MULTIPLEPROCESS_KLIB_H

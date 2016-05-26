@@ -48,9 +48,13 @@ typedef struct s_proc {
 	DESCRIPTOR ldts[LDT_SIZE];
 
 
-	//remained ticks
+	//remained ticks,递减从初值到0,减到0之后,此进程就不再获得执行的机会
+
 	int ticks;
+	//恒定不变的优先度,当所有的进程ticks都减到0之后,
+	//再把各自的ticks赋值为priority,以便继续执行
 	int priority;
+
 	//process id passed in from MM
 	u32 pid;
 	//name of the process

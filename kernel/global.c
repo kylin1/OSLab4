@@ -35,6 +35,7 @@ PUBLIC	irq_handler		irq_table[NR_IRQ];
 
 //这是一个函数指针数组,每一个成员指向一个函数,用以处理相应的系统调用
 //system_call是 void* 无论系统调用何种函数,都不会有编译时错误
+//第0项是获取当前系统时钟中断发生的次数
 PUBLIC	system_call		sys_call_table[NR_SYS_CALL] = {
 					sys_get_ticks
 					};

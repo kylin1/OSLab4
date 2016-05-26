@@ -46,6 +46,8 @@
 			     * Counter0 - LSB then MSB - rate generator - binary
 			     */
 #define TIMER_FREQ     1193182L/* clock frequency for timer in PC and AT */
+
+//一秒钟发生100次中断,也就是10ms一次中断,ticks也就10ms增加了1
 #define HZ             100  /* clock freq (software settable on IBM-PC) */
 
 /* Hardware interrupts */

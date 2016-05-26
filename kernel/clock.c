@@ -17,7 +17,10 @@
 //时钟中断处理程序
 PUBLIC void clock_handler(int irq)
 {
+	//时钟中断处理数目加1
 	ticks++;
+
+	//下一个进程的ticks-1
 	p_proc_ready->ticks--;
 
 	//如果中断重入,函数直接返回,不做任何操作
@@ -25,16 +28,18 @@ PUBLIC void clock_handler(int irq)
 		return;
 	}
 
+	//当下一个进程还有ticks就返回,使得其他进程不会有机会获得执行
 	if (p_proc_ready->ticks > 0) {
 		return;
 	}
 
+	//下一个进程的ticks变成了0,调用进程调度函数
 	schedule();
-
 }
 
 /*======================================================================*
                               milli_delay
+                             运行在用户态
  *======================================================================*/
 PUBLIC void milli_delay(int milli_sec)
 {

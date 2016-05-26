@@ -92,7 +92,7 @@ PUBLIC int kernel_main()
 		selector_ldt += 1 << 3;
 	}
 
-	//设定优先级别
+	//初始化优先级别与可以获得的ticks数目
 	proc_table[0].ticks = proc_table[0].priority = 15;
 	proc_table[1].ticks = proc_table[1].priority =  5;
 	proc_table[2].ticks = proc_table[2].priority =  3;
@@ -104,14 +104,16 @@ PUBLIC int kernel_main()
 	ticks = 0;
 
 	//准备开始运行各个进程(kernel.asm里面的restart函数使用)
+	//先设置下一个进程是第一个
 	p_proc_ready	= proc_table;
 
-	//初始化 8253 PIT
+	//初始化 8253 PIT,去改变时钟中断的频率
 	out_byte(TIMER_MODE, RATE_GENERATOR);
 	out_byte(TIMER0, (u8) (TIMER_FREQ/HZ) );
 	out_byte(TIMER0, (u8) ((TIMER_FREQ/HZ) >> 8));
 
 	//设定时钟中断处理程序,为irq_table第CLOCK_IRQ(0)个数值赋值
+	//CLOCK_IRQ = 0,对应的处理程序是clock_handler函数
 	//PUBLIC void clock_handler(int irq)
 	put_irq_handler(CLOCK_IRQ, clock_handler);
 

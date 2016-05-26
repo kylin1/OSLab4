@@ -366,17 +366,17 @@ save:
 sys_call:
         call    save
 
-        sti
+        sti     ;关中断
 
-        ;调用sys_call_table的一个函数
-        ;(里面存放了函数名,函数指针数组,例如sys_get_ticks)
+        ;调用sys_call_table的第eax个函数
+        ;(里面存放了函数名,函数指针数组,例如sys_get_ticks是第0个)
         call    [sys_call_table + eax * 4]
 
-        ;把函数 [sys_call_table + eax * 4]的返回值
+        ;把函数  [sys_call_table + eax * 4]的返回值
         ;放在进程表中eax的位置,以便进程P被恢复执行的时候eax中是正确的返回值
         mov     [esi + EAXREG - P_STACKBASE], eax
 
-        cli
+        cli     ;开中断
         ret
 
 
@@ -385,7 +385,7 @@ sys_call:
 ; ====================================================================================
 restart:
     ;这里的选择子必须与protect.h中的值保持一致
-    ;p_proc_ready = proc_table,是进程表指针指向下一个要启动的进程表的地址
+    ;p_proc_ready 是进程表指针指向下一个要启动的进程表的地址
 	mov	esp, [p_proc_ready]
 
 	;设置LDT,P_LDT_SE  equ P_STACKTOP  esp + P_LDT_SEL指向s_proc结构体中的成员ldt_sel,ldt_sel被别的地方,restart函数之前初始化,以便lldt这一行可以正确执行

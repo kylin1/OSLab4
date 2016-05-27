@@ -35,17 +35,18 @@ PUBLIC void schedule()
 				//下一个进程设为p
 				p_proc_ready = p;
 			}
-		}
-		//循环结束之后,下一个进程就是剩余ticks最大的进程
+		}//循环结束之后,下一个进程就是剩余ticks最大的进程
+
 
 		//下面的代码会导致系统无限循环打印ABC而一段时间后产生异常
-		//当剩余最大的ticks就是0了,所有的进程都需要再次分配
-		if (!greatest_ticks) {
-			for (p = proc_table; p < proc_table+NR_TASKS; p++) {
-				//ticks设置为初始值
-				p->ticks = p->priority;
-			}
-		}
+
+//		//当剩余最大的ticks就是0了,所有的进程都需要再次分配
+//		if (!greatest_ticks) {
+//			for (p = proc_table; p < proc_table+NR_TASKS; p++) {
+//				//ticks设置为初始值
+//				p->ticks = p->priority;
+//			}
+//		}
 	}
 }
 
@@ -60,26 +61,26 @@ PUBLIC int sys_get_ticks() {
  * 调用此 System Call 的进程会在 mill_seconds 毫秒内不被进程调度函数分配时间片
  */
 PUBLIC int sys_process_sleep(int mill_seconds) {
-	return 11;
+	return 0x11;
 }
 
 /**
  * 接受一个 char* str 参数, 打印出 字符串
  */
 PUBLIC int sys_disp_str(char* str){
-	return 22;
+	return 0x22;
 }
 
 /**
  * 信号量的 PV 操作
  */
 PUBLIC int sys_sem_p(){
-	return 33;
+	return 0x33;
 }
 
 /**
  * 信号量的 PV 操作
  */
 PUBLIC int sys_sem_v(){
-	return 44;
+	return 0x44;
 }

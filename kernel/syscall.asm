@@ -59,22 +59,22 @@ my_get_ticks:
 	ret
 
 my_process_sleep:
-    mov	eax, _NR_get_ticks
-    int	_NR_process_sleep
+    mov	eax, _NR_process_sleep
+    int	INT_VECTOR_SYS_CALL
     ret
 
 ;本次实验要求加入一个系统调用,通过系统调用模式打印字符串。
 my_disp_str:
-    mov	eax, _NR_get_ticks
-    int	_NR_disp_str
+    mov	eax, _NR_disp_str
+    int	INT_VECTOR_SYS_CALL
     ret
 
 my_sem_p:
-    mov	eax, _NR_get_ticks
-    int	_NR_sem_p
+    mov	eax, _NR_sem_p
+    int	INT_VECTOR_SYS_CALL
     ret
 
 my_sem_v:
-    mov	eax, _NR_get_ticks
-    int	_NR_sem_v
+    mov	eax, _NR_sem_v
+    int	INT_VECTOR_SYS_CALL
     ret

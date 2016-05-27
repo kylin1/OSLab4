@@ -29,7 +29,8 @@ PUBLIC	TASK	task_table[NR_TASKS] = {
 		//一个task: 函数指针,    栈的大小,     进程的名字
 					{TestA, STACK_SIZE_TESTA, "TestA"},
 					{TestB, STACK_SIZE_TESTB, "TestB"},
-					{TestC, STACK_SIZE_TESTC, "TestC"}};
+					{TestC, STACK_SIZE_TESTC, "TestC"}
+				};
 
 //普通进程、理发师进程和顾客进程用不同颜色打印,
 // 其中顾客要打印递增的顾客ID,并打印基本操作
@@ -58,5 +59,5 @@ PUBLIC	system_call		sys_call_table[NR_SYS_CALL] = {
 					sys_disp_str,
 					sys_sem_p,
 					sys_sem_v
-					};
+				};
 

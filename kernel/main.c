@@ -94,9 +94,9 @@ PUBLIC int kernel_main()
 	}
 
 	//初始化优先级别与可以获得的ticks数目
-	proc_table[0].ticks = proc_table[0].priority = 15;
-	proc_table[1].ticks = proc_table[1].priority =  5;
-	proc_table[2].ticks = proc_table[2].priority =  3;
+	proc_table[0].ticks = proc_table[0].priority = 100;
+	proc_table[1].ticks = proc_table[1].priority =  50;
+	proc_table[2].ticks = proc_table[2].priority =  25;
 
 	//中断重入
 	k_reenter = 0;
@@ -136,10 +136,12 @@ PUBLIC int kernel_main()
 //进程体在内核被LOADER放置到内存之后就准备好了
 void TestA()
 {
-	int i = 0;
 	while (1) {
-		disp_str("Aa.");
-		milli_delay(10);
+		disp_str("A");
+		int sleep = my_process_sleep(1001);
+		disp_int(sleep);
+		disp_str("A");
+		milli_delay(100);
 	}
 }
 
@@ -148,10 +150,12 @@ void TestA()
  *======================================================================*/
 void TestB()
 {
-	int i = 0x1000;
 	while(1){
-		disp_str("B.");
-		milli_delay(10);
+		disp_str("B");
+		int v = my_sem_v();
+		disp_int(v);
+		disp_str("B");
+		milli_delay(100);
 	}
 }
 
@@ -160,9 +164,11 @@ void TestB()
  *======================================================================*/
 void TestC()
 {
-	int i = 0x2000;
 	while(1){
-		disp_str("C.");
-		milli_delay(10);
+		disp_str("C");
+		int p = my_sem_p();
+		disp_int(p);
+		disp_str("C");
+		milli_delay(100);
 	}
 }

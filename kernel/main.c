@@ -94,9 +94,11 @@ PUBLIC int kernel_main()
 	}
 
 	//初始化优先级别与可以获得的ticks数目
-	proc_table[0].ticks = proc_table[0].priority = 100;
-	proc_table[1].ticks = proc_table[1].priority =  50;
-	proc_table[2].ticks = proc_table[2].priority =  25;
+	proc_table[0].ticks = proc_table[0].priority = 200;
+	proc_table[1].ticks = proc_table[1].priority = 100;
+	proc_table[2].ticks = proc_table[2].priority =  75;
+	proc_table[3].ticks = proc_table[3].priority =  50;
+	proc_table[4].ticks = proc_table[4].priority =  25;
 
 	//中断重入
 	k_reenter = 0;
@@ -113,12 +115,17 @@ PUBLIC int kernel_main()
 	out_byte(TIMER0, (u8) (TIMER_FREQ/HZ) );
 	out_byte(TIMER0, (u8) ((TIMER_FREQ/HZ) >> 8));
 
-	//设定时钟中断处理程序,为irq_table第CLOCK_IRQ(0)个数值赋值
-	//CLOCK_IRQ = 0,对应的处理程序是clock_handler函数
-	//PUBLIC void clock_handler(int irq)
+	/*
+	 * 下面是开启一个中断的两个步骤
+	 * put_irq_handler(KEYBOARD_IRQ, keyboard_handler);设定键盘中断处理程序
+	 * enable_irq(KEYBOARD_IRQ);                     开键盘中断
+	 * */
+
+	//1.设定时钟中断处理程序,为irq_table第CLOCK_IRQ(0)个数值赋值,对应的处理程序是
+	//clock_handler函数:PUBLIC void clock_handler(int irq)
 	put_irq_handler(CLOCK_IRQ, clock_handler);
 
-	//让8259A可以接收时钟中断
+	//2.让8259A可以接收时钟中断
 	enable_irq(CLOCK_IRQ);
 
 	//ring0 到 ring1的跳转
@@ -134,8 +141,7 @@ PUBLIC int kernel_main()
  *======================================================================*/
 //第一步,准备一个小的进程体
 //进程体在内核被LOADER放置到内存之后就准备好了
-void TestA()
-{
+void TestA() {
 	while (1) {
 		disp_str("A");
 		int sleep = my_process_sleep(1001);
@@ -145,30 +151,30 @@ void TestA()
 	}
 }
 
-/*======================================================================*
-                               TestB
- *======================================================================*/
-void TestB()
-{
-	while(1){
-		disp_str("B");
-		int v = my_sem_v();
-		disp_int(v);
-		disp_str("B");
+void TaskB() {
+	while (1) {
+		disp_str("myB");
 		milli_delay(100);
 	}
 }
 
-/*======================================================================*
-                               TestB
- *======================================================================*/
-void TestC()
-{
-	while(1){
-		disp_str("C");
-		int p = my_sem_p();
-		disp_int(p);
-		disp_str("C");
+void TaskC() {
+	while (1) {
+		disp_str("myC");
+		milli_delay(100);
+	}
+}
+
+void TaskD() {
+	while (1) {
+		disp_str("myD");
+		milli_delay(100);
+	}
+}
+
+void TaskE() {
+	while (1) {
+		disp_str("myE");
 		milli_delay(100);
 	}
 }

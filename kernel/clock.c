@@ -16,8 +16,11 @@
 
 /*======================================================================*
                            clock_handler
+                          时钟中断处理程序
+            main.c里面有put_irq_handler(CLOCK_IRQ, clock_handler);
+            也就是disable_irq(irq);
+            再为irq_table第irq个数值赋值irq_table[irq] = handler;
  *======================================================================*/
-//时钟中断处理程序
 PUBLIC void clock_handler(int irq)
 {
 	//时钟中断处理数目加1

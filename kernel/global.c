@@ -29,13 +29,13 @@ PUBLIC	char			task_stack[STACK_SIZE_TOTAL];
 // (必须都能够支持,并且可以现场修改,助教检查时在其中 随机选择数目),
 // 开始时理发师处于沉睡状态。理发师理发消耗两个时间片。
 PUBLIC	TASK	task_table[NR_TASKS] = {
-					{task_tty, STACK_SIZE_TTY, "tty"},
 		//一个task: 函数指针,    栈的大小,     进程的名字
 					{TestA, STACK_SIZE_TESTA, "Normal"},
 					{TaskB, STACK_SIZE_TESTB, "Hairdresser"},
 					{TaskC, STACK_SIZE_TESTC, "CustomerC"},
 					{TaskD, STACK_SIZE_TESTD, "CustomerD"},
-					{TaskE, STACK_SIZE_TESTE, "CustomerE"}
+					{TaskE, STACK_SIZE_TESTE, "CustomerE"},
+					{task_tty, STACK_SIZE_TTY, "tty"},
 				};
 
 

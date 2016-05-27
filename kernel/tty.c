@@ -15,8 +15,7 @@
 #include "keyboard.h"
 #include "proto.h"
 
-int DEBUG = 1;
-int NOT_DEBUG = 0;
+
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
@@ -63,34 +62,17 @@ PUBLIC void task_tty() {
 
     //初始化时间
     int clear_second = 15;
-    int milli_sec = 10000 * clear_second;
-    int start_time = my_get_ticks();
 
     //无限循环处理TTY的读写操作
     while (1) {
-
-        //1.控制台读取输入的字符并处理
-        //2.tty_do_read    -->  keyboard_read   读取键盘缓存
-        //3.keyboard_read  -->  in_process      处理输入的一个字符,缓存字符
-        tty_do_read(p_tty);
-        //4.输出TTY中的缓存字符到控制台
-        tty_do_write(p_tty,0);
-
-        //判断当前时间是否比起始时间多了clear_second秒
-        if( ((my_get_ticks() - start_time) * 1000 / HZ) >= milli_sec ){
-            //如果不在搜索模式中,clear_second结束,清空屏幕与缓存
-            if(p_tty->p_console->in_search == 0){
-                clear_console(p_tty->p_console);
-                clear_console_cache(p_tty->p_console);
-                //重新设置起始时间
-                start_time = my_get_ticks();
-            }//否则在搜索模式中,不会清空屏幕
-        }
-
-        //在搜索模式中,重启起始时间,使得退出搜索之后还有20秒
-        if(p_tty->p_console->in_search == 1){
-            start_time = my_get_ticks();
-        }
+//        my_disp_str("tty task");
+//        milli_delay(100);
+//        //1.控制台读取输入的字符并处理
+//        //2.tty_do_read    -->  keyboard_read   读取键盘缓存
+//        //3.keyboard_read  -->  in_process      处理输入的一个字符,缓存字符
+//        tty_do_read(p_tty);
+//        //4.输出TTY中的缓存字符到控制台
+//        tty_do_write(p_tty,0);
     }
 }
 
@@ -156,8 +138,8 @@ PUBLIC void in_process(TTY *p_tty, u32 key) {
                     clear_console(p_tty->p_console);
                     //显示搜索结果
                     out_string(p_tty->p_console,p_tty->p_console->cache_char,
-                               p_tty->p_console->cache_color,DEBUG);
-                    out_string_color(p_tty->p_console,p_tty->p_console->target,DEBUG);
+                               p_tty->p_console->cache_color,1);
+                    out_string_color(p_tty->p_console,p_tty->p_console->target,1);
 
                     //并屏蔽除ESC之外任 何输入
                     p_tty->p_console->only_esc = 1;
@@ -208,7 +190,7 @@ PUBLIC void in_process(TTY *p_tty, u32 key) {
 
                     //显示原来的缓存信息,光标回到正确位置
                     out_string(p_tty->p_console,p_tty->p_console->cache_char,
-                               p_tty->p_console->cache_color,DEBUG);
+                               p_tty->p_console->cache_color,1);
 
                 }
                 break;

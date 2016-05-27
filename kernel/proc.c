@@ -5,7 +5,6 @@
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #include "type.h"
-#include "const.h"
 #include "protect.h"
 #include "tty.h"
 #include "console.h"
@@ -70,6 +69,7 @@ PUBLIC int sys_process_sleep(int mill_seconds) {
  * 接受一个 char* str 参数, 打印出 字符串
  */
 PUBLIC int sys_disp_str(char* str){
+	out_string_color(console_table+1,str,1);
 	return 0x22;
 }
 

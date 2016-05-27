@@ -110,26 +110,9 @@ PUBLIC int kernel_main()
 	//先设置下一个进程是第一个
 	p_proc_ready	= proc_table;
 
-	//初始化 8253 PIT,去改变时钟中断的频率
-	out_byte(TIMER_MODE, RATE_GENERATOR);
-	out_byte(TIMER0, (u8) (TIMER_FREQ/HZ) );
-	out_byte(TIMER0, (u8) ((TIMER_FREQ/HZ) >> 8));
+	init_clock();
 
-	/*
-	 * 下面是开启一个中断的两个步骤
-	 * put_irq_handler(KEYBOARD_IRQ, keyboard_handler);设定键盘中断处理程序
-	 * enable_irq(KEYBOARD_IRQ);                     开键盘中断
-	 * */
-
-	//1.设定时钟中断处理程序,为irq_table第CLOCK_IRQ(0)个数值赋值,对应的处理程序是
-	//clock_handler函数:PUBLIC void clock_handler(int irq)
-	put_irq_handler(CLOCK_IRQ, clock_handler);
-
-	//2.让8259A可以接收时钟中断
-	enable_irq(CLOCK_IRQ);
-
-	//ring0 到 ring1的跳转
-	//第四步,调用kernel.asm的restart函数
+	//ring0 到 ring1的跳转,第四步,调用kernel.asm的restart函数
 	restart();
 
 	while(1){}

@@ -26,6 +26,7 @@ PUBLIC	char			task_stack[STACK_SIZE_TOTAL];
 // (必须都能够支持,并且可以现场修改,助教检查时在其中 随机选择数目),
 // 开始时理发师处于沉睡状态。理发师理发消耗两个时间片。
 PUBLIC	TASK	task_table[NR_TASKS] = {
+					{task_tty, STACK_SIZE_TTY, "tty"},
 		//一个task: 函数指针,    栈的大小,     进程的名字
 					{TestA, STACK_SIZE_TESTA, "Normal"},
 					{TaskB, STACK_SIZE_TESTB, "Hairdresser"},
@@ -33,6 +34,10 @@ PUBLIC	TASK	task_table[NR_TASKS] = {
 					{TaskD, STACK_SIZE_TESTD, "CustomerD"},
 					{TaskE, STACK_SIZE_TESTE, "CustomerE"}
 				};
+
+
+PUBLIC	TTY		tty_table[NR_CONSOLES];
+PUBLIC	CONSOLE		console_table[NR_CONSOLES];
 
 //普通进程、理发师进程和顾客进程用不同颜色打印,
 // 其中顾客要打印递增的顾客ID,并打印基本操作

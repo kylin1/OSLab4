@@ -9,8 +9,6 @@
 #define	_ORANGES_PROTECT_H_
 
 
-#include "type.h"
-
 /* 存储段描述符/系统段描述符 */
 typedef struct s_descriptor		/* 共 8 个字节 */
 {

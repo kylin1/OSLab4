@@ -7,10 +7,12 @@
 #include "type.h"
 #include "const.h"
 #include "protect.h"
-#include "proto.h"
+#include "tty.h"
+#include "console.h"
 #include "string.h"
 #include "proc.h"
 #include "global.h"
+#include "proto.h"
 
 
 /*======================================================================*
@@ -40,13 +42,13 @@ PUBLIC void schedule()
 
 		//下面的代码会导致系统无限循环打印ABC而一段时间后产生异常
 
-//		//当剩余最大的ticks就是0了,所有的进程都需要再次分配
-//		if (!greatest_ticks) {
-//			for (p = proc_table; p < proc_table+NR_TASKS; p++) {
-//				//ticks设置为初始值
-//				p->ticks = p->priority;
-//			}
-//		}
+		//当剩余最大的ticks就是0了,所有的进程都需要再次分配
+		if (!greatest_ticks) {
+			for (p = proc_table; p < proc_table+NR_TASKS; p++) {
+				//ticks设置为初始值
+				p->ticks = p->priority;
+			}
+		}
 	}
 }
 

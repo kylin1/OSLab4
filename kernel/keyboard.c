@@ -77,8 +77,8 @@ PUBLIC void init_keyboard()
 
 	set_leds();
 
-        put_irq_handler(KEYBOARD_IRQ, keyboard_handler);/*设定键盘中断处理程序*/
-        enable_irq(KEYBOARD_IRQ);                       /*开键盘中断*/
+	put_irq_handler(KEYBOARD_IRQ, keyboard_handler);/*设定键盘中断处理程序*/
+	enable_irq(KEYBOARD_IRQ);                       /*开键盘中断*/
 }
 
 
@@ -106,7 +106,7 @@ PUBLIC u32 keyboard_read(TTY *p_tty)
 		if (scan_code == 0xE1) {
 			int i;
 			u8 pausebrk_scode[] = {0xE1, 0x1D, 0x45,
-					       0xE1, 0x9D, 0xC5};
+								   0xE1, 0x9D, 0xC5};
 			int is_pausebreak = 1;
 			for(i=1;i<6;i++){
 				if (get_byte_from_kbuf() != pausebrk_scode[i]) {
@@ -170,44 +170,44 @@ PUBLIC u32 keyboard_read(TTY *p_tty)
 			key = keyrow[column];
 
 			switch(key) {
-			case SHIFT_L:
-				shift_l = make;
-				break;
-			case SHIFT_R:
-				shift_r = make;
-				break;
-			case CTRL_L:
-				ctrl_l = make;
-				break;
-			case CTRL_R:
-				ctrl_r = make;
-				break;
-			case ALT_L:
-				alt_l = make;
-				break;
-			case ALT_R:
-				alt_l = make;
-				break;
-			case CAPS_LOCK:
-				if (make) {
-					caps_lock   = !caps_lock;
-					set_leds();
-				}
-				break;
-			case NUM_LOCK:
-				if (make) {
-					num_lock    = !num_lock;
-					set_leds();
-				}
-				break;
-			case SCROLL_LOCK:
-				if (make) {
-					scroll_lock = !scroll_lock;
-					set_leds();
-				}
-				break;
-			default:
-				break;
+				case SHIFT_L:
+					shift_l = make;
+					break;
+				case SHIFT_R:
+					shift_r = make;
+					break;
+				case CTRL_L:
+					ctrl_l = make;
+					break;
+				case CTRL_R:
+					ctrl_r = make;
+					break;
+				case ALT_L:
+					alt_l = make;
+					break;
+				case ALT_R:
+					alt_l = make;
+					break;
+				case CAPS_LOCK:
+					if (make) {
+						caps_lock   = !caps_lock;
+						set_leds();
+					}
+					break;
+				case NUM_LOCK:
+					if (make) {
+						num_lock    = !num_lock;
+						set_leds();
+					}
+					break;
+				case SCROLL_LOCK:
+					if (make) {
+						scroll_lock = !scroll_lock;
+						set_leds();
+					}
+					break;
+				default:
+					break;
 			}
 
 			if (make) { /* 忽略 Break Code */
@@ -217,68 +217,68 @@ PUBLIC u32 keyboard_read(TTY *p_tty)
 				if ((key >= PAD_SLASH) && (key <= PAD_9)) {
 					pad = 1;
 					switch(key) {
-					case PAD_SLASH:
-						key = '/';
-						break;
-					case PAD_STAR:
-						key = '*';
-						break;
-					case PAD_MINUS:
-						key = '-';
-						break;
-					case PAD_PLUS:
-						key = '+';
-						break;
-					case PAD_ENTER:
-						key = ENTER;
-						break;
-					default:
-						if (num_lock &&
-						    (key >= PAD_0) &&
-						    (key <= PAD_9)) {
-							key = key - PAD_0 + '0';
-						}
-						else if (num_lock &&
-							 (key == PAD_DOT)) {
-							key = '.';
-						}
-						else{
-							switch(key) {
-							case PAD_HOME:
-								key = HOME;
-								break;
-							case PAD_END:
-								key = END;
-								break;
-							case PAD_PAGEUP:
-								key = PAGEUP;
-								break;
-							case PAD_PAGEDOWN:
-								key = PAGEDOWN;
-								break;
-							case PAD_INS:
-								key = INSERT;
-								break;
-							case PAD_UP:
-								key = UP;
-								break;
-							case PAD_DOWN:
-								key = DOWN;
-								break;
-							case PAD_LEFT:
-								key = LEFT;
-								break;
-							case PAD_RIGHT:
-								key = RIGHT;
-								break;
-							case PAD_DOT:
-								key = DELETE;
-								break;
-							default:
-								break;
+						case PAD_SLASH:
+							key = '/';
+							break;
+						case PAD_STAR:
+							key = '*';
+							break;
+						case PAD_MINUS:
+							key = '-';
+							break;
+						case PAD_PLUS:
+							key = '+';
+							break;
+						case PAD_ENTER:
+							key = ENTER;
+							break;
+						default:
+							if (num_lock &&
+								(key >= PAD_0) &&
+								(key <= PAD_9)) {
+								key = key - PAD_0 + '0';
 							}
-						}
-						break;
+							else if (num_lock &&
+									 (key == PAD_DOT)) {
+								key = '.';
+							}
+							else{
+								switch(key) {
+									case PAD_HOME:
+										key = HOME;
+										break;
+									case PAD_END:
+										key = END;
+										break;
+									case PAD_PAGEUP:
+										key = PAGEUP;
+										break;
+									case PAD_PAGEDOWN:
+										key = PAGEDOWN;
+										break;
+									case PAD_INS:
+										key = INSERT;
+										break;
+									case PAD_UP:
+										key = UP;
+										break;
+									case PAD_DOWN:
+										key = DOWN;
+										break;
+									case PAD_LEFT:
+										key = LEFT;
+										break;
+									case PAD_RIGHT:
+										key = RIGHT;
+										break;
+									case PAD_DOT:
+										key = DELETE;
+										break;
+									default:
+										break;
+								}
+							}
+							break;
 					}
 				}
 
@@ -291,12 +291,12 @@ PUBLIC u32 keyboard_read(TTY *p_tty)
 				key |= pad      ? FLAG_PAD      : 0;
 
 				//3.让当前控制台处理输入的一个字符
-                in_process(p_tty,key);
+				in_process(p_tty,key);
 			}
 		}
 	}
 
-    return key;
+	return key;
 }
 
 /*======================================================================*
@@ -304,18 +304,18 @@ PUBLIC u32 keyboard_read(TTY *p_tty)
  *======================================================================*/
 PRIVATE u8 get_byte_from_kbuf()       /* 从键盘缓冲区中读取下一个字节 */
 {
-        u8 scan_code;
+	u8 scan_code;
 
-        while (kb_in.count <= 0) {}   /* 等待下一个字节到来 */
+	while (kb_in.count <= 0) {}   /* 等待下一个字节到来 */
 
-        disable_int();
-        scan_code = *(kb_in.p_tail);
-        kb_in.p_tail++;
-        if (kb_in.p_tail == kb_in.buf + KB_IN_BYTES) {
-                kb_in.p_tail = kb_in.buf;
-        }
-        kb_in.count--;
-        enable_int();
+	disable_int();
+	scan_code = *(kb_in.p_tail);
+	kb_in.p_tail++;
+	if (kb_in.p_tail == kb_in.buf + KB_IN_BYTES) {
+		kb_in.p_tail = kb_in.buf;
+	}
+	kb_in.count--;
+	enable_int();
 
 	return scan_code;
 }

@@ -10,9 +10,12 @@
 #include "type.h"
 #include "const.h"
 #include "protect.h"
-#include "proto.h"
+#include "tty.h"
+#include "console.h"
 #include "proc.h"
 #include "global.h"
+#include "proto.h"
+
 
 //声明进程表,NR_TASKS是最大允许进程数目
 PUBLIC	PROCESS			proc_table[NR_TASKS];

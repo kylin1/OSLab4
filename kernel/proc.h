@@ -1,6 +1,3 @@
-#include "type.h"
-#include "protect.h"
-#include "const.h"
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                proc.h

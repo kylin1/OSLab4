@@ -64,7 +64,7 @@ PUBLIC void task_tty() {
     //初始化时间
     int clear_second = 15;
     int milli_sec = 10000 * clear_second;
-    int start_time = get_ticks();
+    int start_time = my_get_ticks();
 
     //无限循环处理TTY的读写操作
     while (1) {
@@ -77,19 +77,19 @@ PUBLIC void task_tty() {
         tty_do_write(p_tty,0);
 
         //判断当前时间是否比起始时间多了clear_second秒
-        if( ((get_ticks() - start_time) * 1000 / HZ) >= milli_sec ){
+        if( ((my_get_ticks() - start_time) * 1000 / HZ) >= milli_sec ){
             //如果不在搜索模式中,clear_second结束,清空屏幕与缓存
             if(p_tty->p_console->in_search == 0){
                 clear_console(p_tty->p_console);
                 clear_console_cache(p_tty->p_console);
                 //重新设置起始时间
-                start_time = get_ticks();
+                start_time = my_get_ticks();
             }//否则在搜索模式中,不会清空屏幕
         }
 
         //在搜索模式中,重启起始时间,使得退出搜索之后还有20秒
         if(p_tty->p_console->in_search == 1){
-            start_time = get_ticks();
+            start_time = my_get_ticks();
         }
     }
 }
@@ -119,7 +119,7 @@ PUBLIC void in_process(TTY *p_tty, u32 key) {
         put_key(p_tty, key);
     }
 
-    //不可打印字符:控制性字符
+        //不可打印字符:控制性字符
     else {
         switch (raw_code) {
             //回车

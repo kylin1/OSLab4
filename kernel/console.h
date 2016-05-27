@@ -28,23 +28,23 @@ typedef struct s_console
 	unsigned int	v_mem_limit;		/* 当前控制台占的显存大小 */
 	unsigned int	cursor;			/* 当前光标位置 */
 
-    //输出过的所有字符
+	//输出过的所有字符
 	char cache_char[SCREEN_SIZE];
 	//这个字符被输出之前光标的位置
 	int cache_char_mem_pos[SCREEN_SIZE];
 	//输出过的所有字符对应的颜色
-    int cache_color[SCREEN_SIZE];
+	int cache_color[SCREEN_SIZE];
 	//下一个可缓存字符位置
-    int current_char_pos;
+	int current_char_pos;
 
-    //被查找的目标字符串缓存与当前位置
-    char target[100];
-    int current_target_pos;
+	//被查找的目标字符串缓存与当前位置
+	char target[100];
+	int current_target_pos;
 
 	//是否处于搜索模式
-    int in_search;
+	int in_search;
 	//是否处于搜索模式中按下回车后的状态,即只接受ESC,屏蔽其他按键的状态
-    int only_esc;
+	int only_esc;
 
 }CONSOLE;
 

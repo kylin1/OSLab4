@@ -373,6 +373,8 @@ sys_call:
         ;call函数无法使用ret返回是因为函数调用前后esp的值是完全不同的
 	    ;必须事先将返回地址保存起来,最后使用jmp指令跳转回去
 
+        ;esi = 进程表起始地址
+
         sti     ;关中断
 
         ;eax是在syscall.asm里面设置好的顺序
@@ -385,6 +387,7 @@ sys_call:
 
         ;把函数  [sys_call_table + eax * 4]的返回值(eax)
         ;放在进程表中eax的位置,以便进程P被恢复执行的时候eax中是正确的返回值
+
         ;esi 在这里还是进程表起始地址
         mov     [esi + EAXREG - P_STACKBASE], eax
 

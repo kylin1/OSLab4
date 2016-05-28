@@ -17,7 +17,7 @@ extern	disp_pos
 global	disp_str
 
 
-global	sys_disp_str
+global	kliba_disp_str
 
 
 global	disp_color_str
@@ -30,11 +30,13 @@ global	disable_int
 
 
 ; ========================================================================
-;		   void sys_disp_str(char * info);
+;		   void kliba_disp_str(char * info);
 ; ========================================================================
-sys_disp_str:
+kliba_disp_str:
 	push	ebp         ;保护先前EBP指针(执行函数前,主函数的堆栈指针)
-	mov	ebp, esp        ;esp = 进程表起始地址
+                        ;EBP只是存取某时刻的栈顶指针,以方便对栈的操作
+    mov     ebp, esp    ;ESP就是一直指向栈顶的指针
+    push    esi
 
 	;取出EBX里面存储的字符串地址到esi寄存器
 	;esi是进程表起始地址
@@ -42,7 +44,7 @@ sys_disp_str:
 
 	mov	edi, [disp_pos] ; edi保存当前显示字符串的位置
 	mov	ah, 0Fh
-	push esi
+
 .1:
 	lodsb               ;把esi指向的存储单元读入累加器AL,然后SI自动增加或减小1或2位
 	test	al, al      ;根据and的结果设置flags寄存器的各种标志

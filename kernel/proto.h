@@ -14,6 +14,7 @@
 PUBLIC void	out_byte(u16 port, u8 value);
 PUBLIC u8	in_byte(u16 port);
 PUBLIC void	disp_str(char * info);
+PUBLIC void	new_disp_str(char * info);
 PUBLIC void	disp_color_str(char * info, int color);
 
 /* protect.c */
@@ -63,7 +64,7 @@ PUBLIC  int sys_get_ticks();        /* sys_call */
 PUBLIC int sys_process_sleep(int mill_seconds);
 
 // 2,接受一个 char* str 参数, 打印出 字符串。
-PUBLIC int sys_disp_str(char* str);
+PUBLIC void sys_disp_str(char* str);
 
 // 3,信号量的 PV 操作
 PUBLIC int sys_sem_p();

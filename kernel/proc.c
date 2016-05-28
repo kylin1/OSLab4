@@ -66,17 +66,9 @@ PUBLIC int sys_process_sleep(int mill_seconds) {
 }
 
 /**
- * 接受一个 char* str 参数, 打印出 字符串
- */
-PUBLIC int sys_disp_str(char* str){
-	out_string_color(console_table+1,str,1);
-	return 0x22;
-}
-
-/**
  * 信号量的 PV 操作
  */
-PUBLIC int sys_sem_p(){
+PUBLIC int sys_sem_p(){3ex
 	return 0x33;
 }
 

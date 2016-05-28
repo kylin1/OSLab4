@@ -133,7 +133,7 @@ void TestA() {
 
 void TaskB() {
 	while (1) {
-		disp_str("b");
+		my_disp_str("b");
 		milli_delay(100);
 	}
 }

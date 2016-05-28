@@ -42,30 +42,49 @@ bits 32
 ; ====================================================================
 my_get_ticks:
 
-    ;eax的值是一个定义的数字,代表有人要求使用这个系统调用
-	;eax = _NR_get_ticks = 0,而系统调用表第0项
-	;第0项已经被初始化为sys_get_ticks函数
+    ;一,eax的值是一个定义的数字,代表有人要求使用这个系统调用
+	;eax = _NR_get_ticks = 0,而系统调用表第0项(为sys_get_ticks函数)
 	;sys_get_ticks函数的实现在proc.c里面
 
 	mov	eax, _NR_get_ticks
 
 	;需要定义 INT_VECTOR_SYS_CALL = 90 对应的中断门
-	;在protect.c里面的 init_prot()中初始化中断门
-	;调用第INT_VECTOR_SYS_CALL也就是90个中断门
+	;在protect.c里面的 init_prot()中初始化第90个中断门
+	;二,int INT_VECTOR_SYS_CALL 将由sys_call处理
+
+	;三,将寄存器的参数写入核心栈
 
 	int	INT_VECTOR_SYS_CALL
+
+	;四,调用的目标函数就和普通C函数一样处理,都从各自的堆栈中获取参数
+    ;sys_call代码:
+    ;call    save
+    ;sti     ;关中断
+    ;调用sys_call_table的第eax个函数
+    ;call    [sys_call_table + eax * 4]
 
 	;返回
 	ret
 
 my_process_sleep:
+    ;应用进程在执行系统调用之前,将参数写入寄存器ebx.ecx等
     mov	eax, _NR_process_sleep
     int	INT_VECTOR_SYS_CALL
     ret
 
 ;本次实验要求加入一个系统调用,通过系统调用模式打印字符串。
+
+;对用户展现的函数接口
+;int my_disp_str(char *string);
+
 my_disp_str:
+
+    ;系统调用号
     mov	eax, _NR_disp_str
+
+    ;应用进程在执行系统调用之前向约定的寄存器写入参数
+    mov ebx, [esp+4]          ;string address
+
     int	INT_VECTOR_SYS_CALL
     ret
 

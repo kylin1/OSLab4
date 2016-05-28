@@ -161,6 +161,16 @@ PUBLIC void init_prot()
 	init_idt_desc(INT_VECTOR_IRQ8 + 7,      DA_386IGate,
 				  hwint15,                  PRIVILEGE_KRNL);
 
+	//初始化得到tickets的中断门
+	//将 INT_VECTOR_SYS_CALL = 90 与 sys_call 对应起来
+	//int INT_VECTOR_SYS_CALL 将由sys_call处理
+
+	//sys_call: call    [sys_call_table + eax * 4]
+	//也就是调用globcal.c里面的sys_call_table的第eax个函数进行对应处理
+
+	//					char vector, u8 desc_type,
+	// 		int_handler handler,unsigned char privilege)
+
 	init_idt_desc(INT_VECTOR_SYS_CALL,	DA_386IGate,
 				  sys_call,			PRIVILEGE_USER);
 

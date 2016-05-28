@@ -7,15 +7,15 @@
 
 
 typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
-	u32	gs;		/* ┓gs指向选择子(内部有描述符索引)						│			*/
-	u32	fs;		/* ┃						│			*/
-	u32	es;		/* ┃						│			*/
-	u32	ds;		/* ┃						│			*/
+	u32	gs;			/* ┓gs指向选择子(内部有描述符索引)						│			*/
+	u32	fs;			/* ┃						│			*/
+	u32	es;			/* ┃						│			*/
+	u32	ds;			/* ┃						│			*/
 
 	u32	edi;		/* ┃						│			*/
-	u32	esi;		/* ┣ pushed by save()				│			*/
+	u32	esi;		/* ┣ pushed by save()		│			*/
 	u32	ebp;		/* ┃						│			*/
-	u32	kernel_esp;	/* <- 'popad' will ignore it			│			*/
+	u32	kernel_esp;	/* <- 'popad' will ignore it│			*/
 	u32	ebx;		/* ┃						↑栈从高地址往低地址增长*/
 	u32	edx;		/* ┃						│			*/
 	u32	ecx;		/* ┃						│			*/
@@ -24,7 +24,7 @@ typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 	u32	retaddr;	/* return address for assembly code save()	│			*/
 
 	u32	eip;		/*  ┓ 指令指针寄存器.存放一个进程当前指令的下一条指令的地址 					│			*/
-	u32	cs;			/*  ┃						│			*/
+	u32	cs;			/*  ┃ 把用户栈的%esp的值及相关寄存器压入内核栈中，系统调用通过iret指令返回*/
 	u32	eflags;		/*  ┣ these are pushed by CPU during interrupt	│			*/
 	u32	esp;		/*  ┃ 指向一个进程的堆栈						│			*/
 	u32	ss;			/*  ┛						┷High			*/
@@ -32,7 +32,7 @@ typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 
 
 //进程的状态被放在s_proc这个结构体中,也就是进程表
-//要恢复一个进程时,将esp指针指向这个结构体的开始出,然后一系列pop将寄存器的数值弹出
+//要恢复一个进程时,将esp指针指向这个结构体的开始处,然后一系列pop将寄存器的数值弹出
 typedef struct s_proc {
 
 	//前部分是所有相关寄存器的数值 process registers saved in stack frame

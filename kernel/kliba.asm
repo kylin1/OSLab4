@@ -15,6 +15,11 @@ extern	disp_pos
 
 ; 导出函数
 global	disp_str
+
+
+global	sys_disp_str
+
+
 global	disp_color_str
 global	out_byte
 global	in_byte
@@ -24,25 +29,75 @@ global	enable_int
 global	disable_int
 
 
+; ========================================================================
+;		   void sys_disp_str(char * info);
+; ========================================================================
+sys_disp_str:
+	push	ebp         ;保护先前EBP指针(执行函数前,主函数的堆栈指针)
+	mov	ebp, esp        ;esp = 进程表起始地址
+
+	;取出EBX里面存储的字符串地址到esi寄存器
+	;esi是进程表起始地址
+	mov	esi, [esi + EBXREG - P_STACKBASE]	; pszInfo
+
+	mov	edi, [disp_pos] ; edi保存当前显示字符串的位置
+	mov	ah, 0Fh
+	push esi
+.1:
+	lodsb               ;把esi指向的存储单元读入累加器AL,然后SI自动增加或减小1或2位
+	test	al, al      ;根据and的结果设置flags寄存器的各种标志
+	jz	.2              ;ZF=1(表示本次运算结果为0)，则跳转结束
+	cmp	al, 0Ah	; 是回车吗?
+	jnz	.3      ;不是回车跳转
+
+    ;是回车
+	push	eax
+
+	mov	eax, edi        ;当前字符串显示的位置
+	mov	bl, 160
+	div	bl
+	and	eax, 0FFh
+	inc	eax
+	mov	bl, 160
+	mul	bl
+	mov	edi, eax
+
+	pop	eax
+
+	jmp	.1
+.3:
+	mov	[gs:edi], ax    ;向显存写入字符
+	add	edi, 2          ;下一个显示的位置递增2
+	jmp	.1
+
+.2:
+	mov	[disp_pos], edi ;保存当前显存位置
+
+    pop esi
+	pop	ebp             ; 恢复ebp
+	ret                 ; 恢复进入函数前的堆栈
+
+
 
 ; ========================================================================
 ;		   void disp_str(char * info);
 ; ========================================================================
 disp_str:
-	push	ebp
+	push	ebp         ;保护先前EBP指针(执行函数前,主函数的堆栈指针)
 	mov	ebp, esp
 
 	mov	esi, [ebp + 8]	; pszInfo
-	mov	edi, [disp_pos]
+	mov	edi, [disp_pos] ; edi保存当前显示字符串的位置
 	mov	ah, 0Fh
 .1:
-	lodsb
-	test	al, al
-	jz	.2
+	lodsb               ;把esi指向的存储单元读入累加器AL,然后SI自动增加或减小1或2位
+	test	al, al      ;根据and的结果设置flags寄存器的各种标志
+	jz	.2              ;ZF=1(表示本次运算结果为0)，则跳转结束
 	cmp	al, 0Ah	; 是回车吗?
-	jnz	.3
+	jnz	.3      ;不是回车跳转
+
 	push	eax
-	mov	eax, edi
+	mov	eax, edi        ;当前字符串显示的位置
 	mov	bl, 160
 	div	bl
 	and	eax, 0FFh
@@ -51,17 +106,18 @@ disp_str:
 	mul	bl
 	mov	edi, eax
 	pop	eax
+
 	jmp	.1
 .3:
-	mov	[gs:edi], ax
-	add	edi, 2
+	mov	[gs:edi], ax    ;向显存写入字符
+	add	edi, 2          ;下一个显示的位置递增2
 	jmp	.1
 
 .2:
-	mov	[disp_pos], edi
+	mov	[disp_pos], edi ;保存当前显存位置
 
-	pop	ebp
-	ret
+	pop	ebp             ; 恢复ebp
+	ret                 ; 恢复进入函数前的堆栈
 
 ; ========================================================================
 ;		   void disp_color_str(char * info, int color);
@@ -118,7 +174,7 @@ out_byte:
 in_byte:
 	mov	edx, [esp + 4]		; port
 	xor	eax, eax
-	in	al, dx
+	in	al, dx ;把一个字节或一个字由一个输入端口（port），传送至AL
 	nop	; 一点延迟
 	nop
 	ret

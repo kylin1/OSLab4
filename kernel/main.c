@@ -132,36 +132,35 @@ PUBLIC int kernel_main()
 //进程体在内核被LOADER放置到内存之后就准备好了
 void TestA() {
 	while (1) {
-		int y = my_disp_str("a");
-		disp_int(y);
-		milli_delay(300);
+		my_disp_str("detached head");
+		milli_delay(1000);
 	}
 }
 
 void TaskB() {
 	while (1) {
 		my_disp_str("b");
-		milli_delay(300);
+		milli_delay(3000);
 	}
 }
 
 void TaskC() {
 	while (1) {
-		my_disp_str(p_proc_ready->p_name);
-		milli_delay(300);
+		my_disp_str("c");
+		milli_delay(1000);
 	}
 }
 
 void TaskD() {
 	while (1) {
-		disp_int(my_sem_v());
-		milli_delay(300);
+		my_disp_str(p_proc_ready->p_name);
+		milli_delay(1000);
 	}
 }
 
 void TaskE() {
 	while (1) {
-		disp_int(my_sem_p());
-		milli_delay(1300);
+		my_disp_str(p_proc_ready->p_name);
+		milli_delay(1000);
 	}
 }

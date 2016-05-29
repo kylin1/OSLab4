@@ -64,8 +64,6 @@ PUBLIC  int sys_get_ticks();        /* sys_call */
 PUBLIC int sys_process_sleep(int mill_seconds);
 
 // 2,接受一个 char* str 参数, 打印出 字符串。
-PUBLIC void kliba_disp_str(char* str);
-
 PUBLIC int sys_disp_str(char* str);
 
 // 3,信号量的 PV 操作

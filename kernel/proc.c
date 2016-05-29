@@ -12,7 +12,6 @@
 #include "proc.h"
 #include "global.h"
 #include "proto.h"
-#include "klib.h"
 
 
 /*======================================================================*
@@ -65,15 +64,6 @@ PUBLIC int sys_get_ticks() {
 PUBLIC int sys_process_sleep(int mill_seconds) {
 	return 0x11;
 }
-
-/**
- * 内核处理函数,打印字符串,调用kliba_disp_str
- */
-PUBLIC int sys_disp_str(char *input) {
-	kliba_disp_str(input);
-	return 0x22;
-}
-
 
 /**
  * 信号量的 PV 操作

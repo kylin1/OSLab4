@@ -374,8 +374,13 @@ sys_call:
 	    ;必须事先将返回地址保存起来,最后使用jmp指令跳转回去
 
         ;esi = 进程表起始地址
-
         sti     ;关中断
+
+
+
+        push esi
+
+
 
         ;eax是在syscall.asm里面设置好的顺序
         ;调用sys_call_table的第eax个函数
@@ -385,9 +390,12 @@ sys_call:
         ;C语言函数调用约定,函数返回值在eax里面
         ;也就是说内核函数的返回值就在eax里面
 
+
+        pop esi
+
+
         ;把函数  [sys_call_table + eax * 4]的返回值(eax)
         ;放在进程表中eax的位置,以便进程P被恢复执行的时候eax中是正确的返回值
-
         ;esi 在这里还是进程表起始地址
         mov     [esi + EAXREG - P_STACKBASE], eax
 

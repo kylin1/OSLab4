@@ -94,7 +94,7 @@ PUBLIC int kernel_main()
 	}
 
 	//初始化优先级别与可以获得的ticks数目
-	proc_table[0].ticks = proc_table[0].priority =  20;
+	proc_table[0].ticks = proc_table[0].priority =  50;
 	proc_table[1].ticks = proc_table[1].priority =  10;
 	proc_table[2].ticks = proc_table[2].priority =  10;
 	proc_table[3].ticks = proc_table[3].priority =  10;
@@ -115,6 +115,12 @@ PUBLIC int kernel_main()
 	//ring0 到 ring1的跳转,第四步,调用kernel.asm的restart函数
 	restart();
 
+	disp_pos = 0;
+	for(i=0;i<80*20;i++){
+		disp_str(" ");
+	}
+	disp_pos = 0;
+
 	while(1){}
 }
 
@@ -127,34 +133,34 @@ PUBLIC int kernel_main()
 void TestA() {
 	while (1) {
 		my_disp_str("detached head");
-		milli_delay(100);
+		milli_delay(1000);
 	}
 }
 
 void TaskB() {
 	while (1) {
 		my_disp_str("b");
-		milli_delay(100);
+		milli_delay(3000);
 	}
 }
 
 void TaskC() {
 	while (1) {
 		my_disp_str("c");
-		milli_delay(100);
+		milli_delay(1000);
 	}
 }
 
 void TaskD() {
 	while (1) {
 		my_disp_str(p_proc_ready->p_name);
-		milli_delay(100);
+		milli_delay(1000);
 	}
 }
 
 void TaskE() {
 	while (1) {
 		my_disp_str(p_proc_ready->p_name);
-		milli_delay(100);
+		milli_delay(1000);
 	}
 }

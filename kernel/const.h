@@ -23,23 +23,12 @@
  *      MAKE_COLOR(BLACK, RED) | BRIGHT | FLASH
  */
 
-
-/*
- * ;黑色         mov	ah, 0Fh
-    ;绿色         mov   ah, 0x02
-    ;蓝绿色       mov   ah, 0x03
-    ;红色         mov	ah, 0x04
-    ;紫色         mov   ah, 0x05
-    ;橙色         mov   ah, 0x06
-    ;灰色         mov   ah, 0x07
- * */
-
 #define GREEN       0x03
 #define RED         0x04
 #define PURPLE      0x05
 #define ORANGE      0x06
-#define WHITE       0x07
-#define GREY        0x0F
+#define GREY       0x07
+#define WHITE      0x0F
 
 #define FLASH   0x80    /* 1000 0000 */
 #define BRIGHT  0x08    /* 0000 1000 */

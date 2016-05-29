@@ -43,7 +43,6 @@ sys_disp_str:
 
 	mov	edi, [disp_pos] ; edi保存当前显示字符串的位置
 
-
 .1:
 	lodsb               ;把esi指向的存储单元读入累加器AL,然后SI自动增加或减小1或2位
 	test	al, al      ;根据and的结果设置flags寄存器的各种标志

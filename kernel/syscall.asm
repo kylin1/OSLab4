@@ -84,6 +84,7 @@ my_disp_str:
 
     ;应用进程在执行系统调用之前向约定的寄存器写入参数
     mov ebx, [esp+4]          ;string address
+    mov ecx, [esp+8]          ;color
 
     int	INT_VECTOR_SYS_CALL
     ret

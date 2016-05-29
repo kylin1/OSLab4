@@ -30,7 +30,7 @@ global	disable_int
 
 
 ; ========================================================================
-;		   void sys_disp_str(char * info);
+;		   sys_disp_str 的nasm实现
 ; ========================================================================
 sys_disp_str:
 	push	ebp         ;保护先前EBP指针(执行函数前,主函数的堆栈指针)
@@ -38,10 +38,12 @@ sys_disp_str:
 
 	;取出EBX里面存储的字符串地址到esi寄存器
 	;esi是进程表起始地址
+	mov	ah, [esi + ECXREG - P_STACKBASE]	; color
 	mov	esi, [esi + EBXREG - P_STACKBASE]	; pszInfo
 
 	mov	edi, [disp_pos] ; edi保存当前显示字符串的位置
-	mov	ah, 0Fh
+
+
 .1:
 	lodsb               ;把esi指向的存储单元读入累加器AL,然后SI自动增加或减小1或2位
 	test	al, al      ;根据and的结果设置flags寄存器的各种标志

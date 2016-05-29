@@ -68,7 +68,7 @@ PUBLIC int sys_process_sleep(int mill_seconds) {
 /**
  * 信号量的 PV 操作
  */
-PUBLIC int sys_sem_p(){3ex
+PUBLIC int sys_sem_p(){
 	return 0x33;
 }
 

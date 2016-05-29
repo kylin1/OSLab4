@@ -126,7 +126,7 @@ PUBLIC int kernel_main()
 //进程体在内核被LOADER放置到内存之后就准备好了
 void TestA() {
 	while (1) {
-		my_disp_str("a");
+		my_disp_str("detached head");
 		milli_delay(100);
 	}
 }

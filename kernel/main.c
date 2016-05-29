@@ -22,7 +22,7 @@
  *======================================================================*/
 PUBLIC int kernel_main()
 {
-	disp_str("-----\"kernel_main\" begins-----\n");
+//	disp_str("-----\"kernel_main\" begins-----\n");
 
 	//第三步,初始化进程表
 

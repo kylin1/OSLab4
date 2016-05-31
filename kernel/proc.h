@@ -8,7 +8,7 @@
 #include "type.h"
 #include "protect.h"
 
-#define NR_TASKS	6
+#define NR_TASKS	5
 
 /* stacks of tasks */
 //增加栈的声明
@@ -90,8 +90,9 @@ typedef struct s_proc {
 
 }PROCESS;
 
-typedef struct s_task {
 
+
+typedef struct s_task {
 	//任务对应的函数指针
 	task_f	initial_eip;
 
@@ -102,14 +103,15 @@ typedef struct s_task {
 	char	name[32];
 }TASK;
 
+
+
 //信号量结构体
 typedef struct semaphore {
-
 	//信号量数值
 	int	value;
 
 	//名称
-	char ame[32];
+	char name[32];
 
 	//信号量等待队列
 	PROCESS* waiting_list[NR_TASKS];
@@ -118,12 +120,9 @@ typedef struct semaphore {
 	int first;
 	//最后一个等待进程指针的位置后面的空闲位置
 	int availbale;
-	//等待进程数量
-	int size;
-
-	int max_size;
-
 }SIGNAL;
+
+
 
 /* syscall.asm */
 PUBLIC  int     my_get_ticks();
@@ -136,15 +135,15 @@ PUBLIC  int     my_sem_v(SIGNAL* signal);
 PUBLIC int sys_get_ticks();        /* sys_call */
 
 // 1,接受一个 int 型参数 mill_seconds,调用此 System Call 的进程会在 mill_seconds 毫秒内不被 进程调度函数分配时间片。
-PUBLIC int sys_process_sleep(int mill_seconds);
+PUBLIC void sys_process_sleep();
 
 // 2,接受一个 char* str 参数, 打印出 字符串。
-PUBLIC int sys_disp_str(char* str,int color);
+PUBLIC void sys_disp_str();
 
 // 3,信号量的 PV 操作
-PUBLIC int sys_sem_p(SIGNAL* signal);
+PUBLIC void sys_sem_p();
 
 // 4,信号量的 PV 操作
-PUBLIC int sys_sem_v(SIGNAL* signal);
+PUBLIC void sys_sem_v();
 
 

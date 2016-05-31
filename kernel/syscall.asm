@@ -69,6 +69,10 @@ my_get_ticks:
 my_process_sleep:
     ;应用进程在执行系统调用之前,将参数写入寄存器ebx.ecx等
     mov	eax, _NR_process_sleep
+
+    ;int mill_seconds
+    mov ebx, [esp+4]
+
     int	INT_VECTOR_SYS_CALL
     ret
 
@@ -91,10 +95,18 @@ my_disp_str:
 
 my_sem_p:
     mov	eax, _NR_sem_p
+
+    ;参数:SIGNAL* signal
+    mov ebx, [esp+4]
+
     int	INT_VECTOR_SYS_CALL
     ret
 
 my_sem_v:
     mov	eax, _NR_sem_v
+
+    ;参数:SIGNAL* signal
+    mov ebx, [esp+4]
+
     int	INT_VECTOR_SYS_CALL
     ret

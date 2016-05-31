@@ -18,10 +18,10 @@
  *======================================================================*/
 PUBLIC void schedule() {
 
-	//当下一个进程还有ticks就返回,使得其他进程不会有机会获得执行
-	if (p_proc_ready->ticks > 0) {
-		return;
-	}
+//	//当下一个进程还有ticks就返回,使得其他进程不会有机会获得执行
+//	if (p_proc_ready->ticks > 0) {
+//		return;
+//	}
 
 	PROCESS* p;
 	int	greatest_ticks = 0;
@@ -55,6 +55,7 @@ PUBLIC void schedule() {
 			}
 		}
 	}
+	//讲道理下面应该会切换到restart函数
 }
 
 /*======================================================================*
@@ -67,7 +68,10 @@ int sys_get_ticks() {
 /**
  * 调用此 System Call 的进程会在 mill_seconds 毫秒内不被进程调度函数分配时间片
  */
-int sys_process_sleep(int mill_seconds) {
+void sys_process_sleep() {
+	int mill_seconds = p_proc_ready->regs.ebx;
+	disp_int(mill_seconds);
+
 	//关中断
 	disable_int();
 
@@ -75,17 +79,21 @@ int sys_process_sleep(int mill_seconds) {
 	p_proc_ready->is_sleep = 1;
 	p_proc_ready->sleep_time = mill_seconds;
 
+	//调度进程
 	schedule();
 
 	//开中断
 	enable_int();
-	return 0x11;
 }
 
 /**
  * 信号量的 PV 操作
  */
-int sys_sem_p(SIGNAL* signal){
+void sys_sem_p(){
+	SIGNAL* signal = (SIGNAL *) p_proc_ready->regs.ebx;
+	disp_str("!p ask for : ");
+	disp_str(signal->name);
+
 	//关中断
 	disable_int();
 
@@ -98,25 +106,47 @@ int sys_sem_p(SIGNAL* signal){
 		PROCESS * proc_tobe_sleep = p_proc_ready;
 		proc_tobe_sleep->is_sleep = 1;
 
-		//加入等待队列的空闲位置,移入信号量等待队列,
+		//加入等待队列的空闲位置,移入信号量等待队列
 		int available = signal->availbale;
 
 		signal->waiting_list[available] = proc_tobe_sleep;
 		//移动空闲指针
-		signal->availbale = (signal->availbale + 1) % signal->max_size;
-		signal->size ++;
+		signal->availbale = (signal->availbale + 1) % NR_TASKS;
 	}
 	//转向调度程序
 	schedule();
 
 	//开中断
 	enable_int();
-	return 0x33;
 }
 
 /**
  * 信号量的 PV 操作
  */
-int sys_sem_v(SIGNAL* signal){
-	return 0x44;
+void sys_sem_v(){
+	SIGNAL* signal = (SIGNAL *) p_proc_ready->regs.ebx;
+	disp_str("!v release : ");
+	disp_str(signal->name);
+	//关中断
+	disable_int();
+
+	//归还信号量物理值
+	signal->value ++;
+
+	//有别的进程在等待
+	if(signal->value <= 0){
+		//释放一个等待信号量S的进程,改成就绪状态
+		int first = signal->first;
+		PROCESS * tobe_wake_up = signal->waiting_list[first];
+		tobe_wake_up->is_sleep = 0;
+
+		//first向下移动
+		signal->first = (signal->first + 1) % NR_TASKS;
+
+		//移入就绪队列
+//		p_proc_ready = tobe_wake_up;
+	}
+
+	enable_int();
+	//执行V操作的进程继续返回执行
 }

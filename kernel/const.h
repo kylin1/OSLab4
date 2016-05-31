@@ -103,4 +103,7 @@
 //添加系统调用之2:修改全局变量系统调用的数量
 #define NR_SYS_CALL     5
 
+#define WAIT_TIMES     2000
+
 #endif /* _ORANGES_CONST_H_ */
+

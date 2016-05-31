@@ -17,37 +17,28 @@
 #include "proto.h"
 
 
+
 //声明进程表,NR_TASKS是最大允许进程数目
 PUBLIC	PROCESS			proc_table[NR_TASKS];
 
 //进程堆栈区域,分配给所有的进程独立使用的部分
 PUBLIC	char			task_stack[STACK_SIZE_TOTAL];
 
-
-// 共有五个进程,A进程普通进程,B进程是理发师,C进程是顾客,D进程是顾客,E进程是顾客。
-// 要求有一把理发椅,并支持等待椅子的数目分 别为 1、2、3
-// (必须都能够支持,并且可以现场修改,助教检查时在其中 随机选择数目),
-// 开始时理发师处于沉睡状态。理发师理发消耗两个时间片。
 PUBLIC	TASK	task_table[NR_TASKS] = {
 		//一个task: 函数指针,    栈的大小,     进程的名字
-					{TestA, STACK_SIZE_TESTA, "Normal"},
-					{TaskB, STACK_SIZE_TESTB, "Hairdresser"},
-					{TaskC, STACK_SIZE_TESTC, "CustomerC"},
-					{TaskD, STACK_SIZE_TESTD, "CustomerD"},
-					{TaskE, STACK_SIZE_TESTE, "CustomerE"},
-					{task_tty, STACK_SIZE_TTY, "tty"},
+					{TestA, STACK_SIZE_TESTA, "Normal "},
+					{TaskB, STACK_SIZE_TESTB, "Barber "},
+					{TaskC, STACK_SIZE_TESTC, "CustomerC "},
+					{TaskD, STACK_SIZE_TESTD, "CustomerD "},
+					{TaskE, STACK_SIZE_TESTE, "CustomerE "}
 				};
 
 
 PUBLIC	TTY		tty_table[NR_CONSOLES];
 PUBLIC	CONSOLE		console_table[NR_CONSOLES];
 
-//普通进程、理发师进程和顾客进程用不同颜色打印,
-// 其中顾客要打印递增的顾客ID,并打印基本操作
-// 比如理发师剪发,顾客得到服务,顾客到来 并等待,顾客离开等。
 
-//A 进程是不调用 sleep 的 (相当于不可以被 sleep 的系统进程),
-// 检查作业时不会要求 A 进程调用 sleep
+
 
 
 

@@ -42,7 +42,7 @@ PUBLIC int kernel_main()
 		//进程的名字是p_task 的名字
 		strcpy(p_proc->p_name, p_task->name);
 		// 进程ID : pid
-		p_proc->pid = i;
+		p_proc->pid = (u32) i;
 
 		//GDT一个选择子,给出此进程的LDT表的地址信息,解决了where的问题
 		p_proc->ldt_sel = selector_ldt;
@@ -84,6 +84,10 @@ PUBLIC int kernel_main()
 
 		//栈的大小减去分配的这一个(从高向低分配空间)
 		p_task_stack -= p_task->stacksize;
+
+		//进程调度信息
+		p_proc->is_sleep = 0;
+		p_proc->sleep_time = 0;
 
 		//下一个进程的信息
 		p_proc++;
@@ -141,6 +145,7 @@ void TaskB() {
 	while (1) {
 		my_disp_str("there is b233",RED);
 		milli_delay(3000);
+		my_process_sleep(123);
 	}
 }
 
@@ -155,6 +160,7 @@ void TaskD() {
 	while (1) {
 		my_disp_str("she is d 2333",ORANGE);
 		milli_delay(1000);
+		my_process_sleep(123);
 	}
 }
 

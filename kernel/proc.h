@@ -1,10 +1,31 @@
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                proc.h
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/* Number of tasks */
+#include "const.h"
+#include "type.h"
+#include "protect.h"
 
+#define NR_TASKS	6
+
+/* stacks of tasks */
+//增加栈的声明
+#define STACK_SIZE_TTY		0x8000
+#define STACK_SIZE_TESTA	0x8000
+#define STACK_SIZE_TESTB	0x8000
+#define STACK_SIZE_TESTC	0x8000
+#define STACK_SIZE_TESTD	0x8000
+#define STACK_SIZE_TESTE	0x8000
+
+//修改总栈的大小
+#define STACK_SIZE_TOTAL	(STACK_SIZE_TTY + \
+				STACK_SIZE_TESTA + \
+				STACK_SIZE_TESTB + \
+				STACK_SIZE_TESTC + \
+				STACK_SIZE_TESTD + \
+				STACK_SIZE_TESTE)
 
 typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 	u32	gs;			/* ┓gs指向选择子(内部有描述符索引)						│			*/
@@ -44,46 +65,86 @@ typedef struct s_proc {
 	//进程LDT表 local descriptors for code and data
 	DESCRIPTOR ldts[LDT_SIZE];
 
+	//process id passed in from MM
+	u32 pid;
+
+	//name of the process
+	char p_name[16];
+
+	/*-----------------进程调度相关变量-------------------*/
+
+	//标识这个进程是否在睡眠状态,睡眠状态为1,不被分配时间片
+	int is_sleep;
+
+	//表示在睡眠状态下的进程要睡眠的时间
+	int sleep_time;
 
 	//remained ticks,递减从初值到0,减到0之后,此进程就不再获得执行的机会
-
 	int ticks;
+
 	//恒定不变的优先度,当所有的进程ticks都减到0之后,
 	//再把各自的ticks赋值为priority,以便继续执行
 	int priority;
 
-	//process id passed in from MM
-	u32 pid;
-	//name of the process
-	char p_name[16];
+
 
 }PROCESS;
 
 typedef struct s_task {
-	task_f	initial_eip; //函数指针
+
+	//任务对应的函数指针
+	task_f	initial_eip;
+
+	//进程自己的栈
 	int		stacksize;
+
+	//名称
 	char	name[32];
 }TASK;
 
+//信号量结构体
+typedef struct semaphore {
 
-/* Number of tasks */
-#define NR_TASKS	6
+	//信号量数值
+	int	value;
 
-/* stacks of tasks */
-//增加栈的声明
-#define STACK_SIZE_TTY		0x8000
-#define STACK_SIZE_TESTA	0x8000
-#define STACK_SIZE_TESTB	0x8000
-#define STACK_SIZE_TESTC	0x8000
-#define STACK_SIZE_TESTD	0x8000
-#define STACK_SIZE_TESTE	0x8000
+	//名称
+	char ame[32];
 
-//修改总栈的大小
-#define STACK_SIZE_TOTAL	(STACK_SIZE_TTY + \
-				STACK_SIZE_TESTA + \
-				STACK_SIZE_TESTB + \
-				STACK_SIZE_TESTC + \
-				STACK_SIZE_TESTD + \
-				STACK_SIZE_TESTE)
+	//信号量等待队列
+	PROCESS* waiting_list[NR_TASKS];
 
-PUBLIC void schedule();
+	//第一个等待进程指针的位置
+	int first;
+	//最后一个等待进程指针的位置后面的空闲位置
+	int availbale;
+	//等待进程数量
+	int size;
+
+	int max_size;
+
+}SIGNAL;
+
+/* syscall.asm */
+PUBLIC  int     my_get_ticks();
+PUBLIC  int     my_process_sleep(int mill_seconds);
+PUBLIC  int     my_disp_str(char* str,int color);
+PUBLIC  int     my_sem_p(SIGNAL* signal);
+PUBLIC  int     my_sem_v(SIGNAL* signal);
+
+// 0,返回ticks的数值
+PUBLIC int sys_get_ticks();        /* sys_call */
+
+// 1,接受一个 int 型参数 mill_seconds,调用此 System Call 的进程会在 mill_seconds 毫秒内不被 进程调度函数分配时间片。
+PUBLIC int sys_process_sleep(int mill_seconds);
+
+// 2,接受一个 char* str 参数, 打印出 字符串。
+PUBLIC int sys_disp_str(char* str,int color);
+
+// 3,信号量的 PV 操作
+PUBLIC int sys_sem_p(SIGNAL* signal);
+
+// 4,信号量的 PV 操作
+PUBLIC int sys_sem_v(SIGNAL* signal);
+
+

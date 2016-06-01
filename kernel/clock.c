@@ -42,11 +42,12 @@ PUBLIC void clock_handler(int irq)
                       本质上还是给予分配了 时间片的,
 		只不过在分配的时间片里在 mills_delay 函数中什么也没做
  *======================================================================*/
-PUBLIC void milli_delay(int milli_sec)
+PUBLIC void delay_ticks(int ticks)
 {
         int t = my_get_ticks();
+        while(	(my_get_ticks() - t) < ticks ) {
 
-        while(((my_get_ticks() - t) * 1000 / HZ) < milli_sec) {}
+		}
 }
 
 PUBLIC void init_clock() {

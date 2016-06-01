@@ -63,6 +63,8 @@
 			     * Counter0 - LSB then MSB - rate generator - binary
 			     */
 #define TIMER_FREQ     1193182L/* clock frequency for timer in PC and AT */
+
+//一秒100次,也就是10ms时钟中断一次
 #define HZ             100  /* clock freq (software settable on IBM-PC) */
 
 /* AT keyboard */
@@ -102,8 +104,6 @@
 /* system call */
 //添加系统调用之2:修改全局变量系统调用的数量
 #define NR_SYS_CALL     5
-
-#define WAIT_TIMES     2000
 
 //进程状态
 

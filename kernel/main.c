@@ -63,16 +63,16 @@ PRIVATE void init_waiting_list(){
 //理发师理发消耗两个时间片
 PRIVATE void cut_hair(){
 	// 打印基本操作:理发师剪发
-	my_disp_str("barber is serving customer ",GREEN);
+	my_disp_str("barber is serving customer_same ",GREEN);
 }
 
 PRIVATE void get_haircut(int customer_id){
 	// 打印基本操作:理发师剪发
-	my_disp_str("customer ",GREEN);
+	my_disp_str("customer_same ",GREEN);
 	disp_int(customer_id);
 	my_disp_str("is being served ",GREEN);
 	//顾客理发结束
-	my_disp_str("customer id = ",RED);
+	my_disp_str("customer_same id = ",RED);
 	disp_int(customer_id);
 	my_disp_str("DONE! ",RED);
 }
@@ -92,9 +92,6 @@ PRIVATE void show_process_name(int color){
 	my_disp_str(p_proc_ready->p_name,color);
 }
 
-PRIVATE void wait_sometime(){
-	milli_delay(WAIT_TIMES);
-}
 
 PUBLIC void check_int(int input,char * str){
 	my_disp_str(str,RED);
@@ -194,7 +191,6 @@ PUBLIC int kernel_main()
 	//初始化系统调用次数ticks = 0;
 	ticks = 0;
 
-
 	/*------------理发师问题数据初始化------------*/
 	num_of_chair = 3;
 	waiting = 0;
@@ -202,65 +198,46 @@ PUBLIC int kernel_main()
 
 	init_waiting_list();
 
-
-
-
 	//设置首先启动的进程
 	p_proc_ready	= proc_table;
 	//初始时钟中断
 	init_clock();
+	clear_screen();
 
 	//ring0 到 ring1(系统到用户)跳转
 	//第四步,调用kernel.asm的restart函数,启动用户进程
 	restart();
 
 	//开始时理发师处于沉睡状态。
-	clear_screen();
+
 	while(1){}
 }
-
 
 /*======================================================================*
                                TestA
 
  *======================================================================*/
-//A进程普通进程
-void TestA() {
-	while (1) {
-		//普通进程、理发师进程和顾客进程用不同颜色打印
-		show_process_name(GREY);
-		wait_sometime();
-	}
-}
 
 
-//B进程是理发师
-void TaskB() {
-	while (1) {
-		show_process_name(ORANGE);
+PRIVATE void barber_task(){
+	//申请顾客customers-1,判断是否有顾客,无顾客,理发师去睡觉
+	my_sem_p(p_customers);
 
-		//申请顾客customers-1,判断是否有顾客,无顾客,理发师去睡觉
-		my_sem_p(p_customers);
+	//运行至此,说明被顾客唤醒
 
-		//运行至此,说明被顾客唤醒
+	/*-----------进入临界区 mutex-1-----------*/
+	my_sem_p(p_mutex);
 
-		/*-----------进入临界区 mutex-1-----------*/
-		my_sem_p(p_mutex);
+	//等候理发的顾客,占用的椅子数目-1
+	waiting --;
 
-		//等候理发的顾客,占用的椅子数目-1
-		waiting --;
+	//理发师释放barbers+1,唤醒顾客,准备理发
+	my_sem_v(p_barbers);
+	my_sem_v(p_mutex);
+	/*-----------退出临界区 mutex+1-----------*/
 
-		//理发师释放barbers+1,唤醒顾客,准备理发
-		my_sem_v(p_barbers);
-		my_sem_v(p_mutex);
-		/*-----------退出临界区 mutex+1-----------*/
-
-		//理发
-		cut_hair();
-
-		//体现过程
-		wait_sometime();
-	}
+	//理发
+	cut_hair();
 }
 
 
@@ -271,7 +248,7 @@ PRIVATE void customer_task(){
 
 	// 其中顾客要打印递增的顾客ID
 	customer_id ++;
-	check_int(customer_id,"customer arrive , id = ");
+	check_int(customer_id,"customer_same arrive , id = ");
 	check_int(waiting,"waiting = ");
 	check_int(num_of_chair,"num_of_chair = ");
 
@@ -282,7 +259,7 @@ PRIVATE void customer_task(){
 		//增加顾客的数目,customers+1,唤醒p操作等待的理发师
 		my_sem_v(p_customers);
 		my_sem_v(p_mutex);
-	/*-----------离开临界区 mutex+1-----------*/
+		/*-----------离开临界区 mutex+1-----------*/
 
 		//申请理发师,barbers-1,若理发师忙,则顾客坐着等待
 		my_sem_p(p_barbers);
@@ -290,38 +267,77 @@ PRIVATE void customer_task(){
 		//走到这里,说明理发师不忙,可以理发,顾客得到服务
 		get_haircut(customer_id);
 
-	//没有空的椅子,人满了,顾客离开
+		//没有空的椅子,人满了,顾客离开
 	}else{
-		my_disp_str("FULL! customer leave , id = ",RED);
+		my_disp_str("FULL! customer_same leave , id = ",RED);
 	}
 	// 顾客到来 并等待
 
 }
 
-void task_customer(){
-	show_process_name(WHITE);
-	customer_task();
+
+PRIVATE void wait_sometime(){
+	delay_ticks(20);
+}
+
+void disp_ticks(){
+	int tic = sys_get_ticks();
+	disp_int(tic);
+}
+
+//A进程普通进程
+void TestA() {
+	while (1) {
+		//普通进程、理发师进程和顾客进程用不同颜色打印
+		show_process_name(GREY);disp_ticks();
+		wait_sometime();
+	}
+}
+
+/**
+ * 理发师作业
+ */
+void TaskB() {
+	while (1) {
+		show_process_name(ORANGE);disp_ticks();
+//		barber_task();
+		wait_sometime();
+	}
+}
+
+/**
+ * 顾客共同的进程作业
+ */
+void customer_same(){
+	show_process_name(WHITE);disp_ticks();
+//	customer_task();
 	wait_sometime();
 }
+
+
+
+
+
+
 
 //C进程是顾客
 void TaskC() {
 	while (1) {
-		task_customer();
+		customer_same();
 	}
 }
 
 //D进程是顾客
 void TaskD() {
 	while (1) {
-		task_customer();
+		customer_same();
 	}
 }
 
 //E进程是顾客
 void TaskE() {
 	while (1) {
-		task_customer();
+		customer_same();
 	}
 }
 

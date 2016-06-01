@@ -64,8 +64,7 @@
 			     */
 #define TIMER_FREQ     1193182L/* clock frequency for timer in PC and AT */
 
-//一秒100次,也就是10ms时钟中断一次
-#define HZ             100  /* clock freq (software settable on IBM-PC) */
+
 
 /* AT keyboard */
 /* 8042 ports */
@@ -115,6 +114,9 @@
 
 //正在运行状态
 #define RUNNING     3
+
+//一秒100次,也就是10ms时钟中断一次
+#define HZ             50  /* clock freq (software settable on IBM-PC) */
 
 #endif /* _ORANGES_CONST_H_ */
 

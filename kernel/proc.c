@@ -21,24 +21,24 @@ PUBLIC void schedule() {
 	//CPU调度使用的就绪队列
 	LIST * ready_list = list_table;
 
-	PROCESS* p;
-	int	greatest_ticks = 0;
+//	PROCESS* p;
+//	int	greatest_ticks = 0;
+//
+//	//找到剩余ticks的最大值
+//	for (p = proc_table; p < proc_table+NR_TASKS; p++) {
+//		if (p->ticks > greatest_ticks) {
+//			greatest_ticks = p->ticks;
+//		}
+//	}
+//	//当剩余最大的ticks就是0了,所有的进程都需要再次分配
+//	if (!greatest_ticks) {
+//		for (p = proc_table; p < proc_table+NR_TASKS; p++) {
+//			//ticks设置为初始值
+//			p->ticks = p->priority;
+//		}
+//	}
 
-	//找到剩余ticks的最大值
-	for (p = proc_table; p < proc_table+NR_TASKS; p++) {
-		if (p->ticks > greatest_ticks) {
-			greatest_ticks = p->ticks;
-		}
-	}
-	//当剩余最大的ticks就是0了,所有的进程都需要再次分配
-	if (!greatest_ticks) {
-		for (p = proc_table; p < proc_table+NR_TASKS; p++) {
-			//ticks设置为初始值
-			p->ticks = p->priority;
-		}
-	}
-
-	//在就绪队列中执行时间片轮转调度算法
+	//----------在就绪队列中执行时间片轮转调度算法----------
 
 	//把正在运行的当前进程暂时保存
 	PROCESS * tobe_last = p_proc_ready;
@@ -46,6 +46,8 @@ PUBLIC void schedule() {
 	//下一个进程是当前就绪队列的第一个进程
 	p_proc_ready = ready_list->first;
 	p_proc_ready->state = RUNNING;
+
+	//从就绪队列中移除即将被执行的进程
 	list_remove(ready_list);
 
 	//将现在正在运行的进程加入就绪队列的尾部,等候下一轮调度

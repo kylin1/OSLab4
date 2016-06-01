@@ -5,15 +5,12 @@
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#include "type.h"
+
 #include "const.h"
-#include "protect.h"
-#include "string.h"
-#include "proc.h"
-#include "tty.h"
-#include "console.h"
 #include "global.h"
+#include "list.h"
 #include "proto.h"
+#include "klib.h"
 
 /*======================================================================*
                            clock_handler

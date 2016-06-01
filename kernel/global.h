@@ -4,8 +4,15 @@
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+#ifndef MULTIPLEPROCESS_GLOBAL_H
+#define MULTIPLEPROCESS_GLOBAL_H
 
 /* EXTERN is defined as extern except in global.c */
+
+#include "proc.h"
+#include "tty.h"
+#include "console.h"
+
 #ifdef	GLOBAL_VARIABLES_HERE
 #undef	EXTERN
 #define	EXTERN
@@ -35,8 +42,4 @@ extern	TTY		tty_table[];
 extern  CONSOLE         console_table[];
 
 
-
-
-
-
-
+#endif //MULTIPLEPROCESS_GLOBAL_H

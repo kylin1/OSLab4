@@ -4,6 +4,8 @@
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+#ifndef MULTIPLEPROCESS_PROTO_H
+#define MULTIPLEPROCESS_PROTO_H
 
 
 #include "const.h"
@@ -65,3 +67,4 @@ PUBLIC void scroll_screen(CONSOLE* p_con, int direction);
 /* int_handler */
 PUBLIC  void    sys_call();
 
+#endif //MULTIPLEPROCESS_PROTO_H

@@ -1,3 +1,6 @@
+#ifndef MULTIPLEPROCESS_PROCC_H
+#define MULTIPLEPROCESS_PROCC_H
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                proc.h
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -28,27 +31,27 @@
 				STACK_SIZE_TESTE)
 
 typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
-	u32	gs;			/* ┓gs指向选择子(内部有描述符索引)						│			*/
-	u32	fs;			/* ┃						│			*/
-	u32	es;			/* ┃						│			*/
-	u32	ds;			/* ┃						│			*/
+    u32	gs;			/* ┓gs指向选择子(内部有描述符索引)						│			*/
+    u32	fs;			/* ┃						│			*/
+    u32	es;			/* ┃						│			*/
+    u32	ds;			/* ┃						│			*/
 
-	u32	edi;		/* ┃						│			*/
-	u32	esi;		/* ┣ pushed by save()		│			*/
-	u32	ebp;		/* ┃						│			*/
-	u32	kernel_esp;	/* <- 'popad' will ignore it│			*/
-	u32	ebx;		/* ┃						↑栈从高地址往低地址增长*/
-	u32	edx;		/* ┃						│			*/
-	u32	ecx;		/* ┃						│			*/
-	u32	eax;		/* ┛						│			*/
+    u32	edi;		/* ┃						│			*/
+    u32	esi;		/* ┣ pushed by save()		│			*/
+    u32	ebp;		/* ┃						│			*/
+    u32	kernel_esp;	/* <- 'popad' will ignore it│			*/
+    u32	ebx;		/* ┃						↑栈从高地址往低地址增长*/
+    u32	edx;		/* ┃						│			*/
+    u32	ecx;		/* ┃						│			*/
+    u32	eax;		/* ┛						│			*/
 
-	u32	retaddr;	/* return address for assembly code save()	│			*/
+    u32	retaddr;	/* return address for assembly code save()	│			*/
 
-	u32	eip;		/*  ┓ 指令指针寄存器.存放一个进程当前指令的下一条指令的地址 					│			*/
-	u32	cs;			/*  ┃ 把用户栈的%esp的值及相关寄存器压入内核栈中，系统调用通过iret指令返回*/
-	u32	eflags;		/*  ┣ these are pushed by CPU during interrupt	│			*/
-	u32	esp;		/*  ┃ 指向一个进程的堆栈						│			*/
-	u32	ss;			/*  ┛						┷High			*/
+    u32	eip;		/*  ┓ 指令指针寄存器.存放一个进程当前指令的下一条指令的地址 					│			*/
+    u32	cs;			/*  ┃ 把用户栈的%esp的值及相关寄存器压入内核栈中，系统调用通过iret指令返回*/
+    u32	eflags;		/*  ┣ these are pushed by CPU during interrupt	│			*/
+    u32	esp;		/*  ┃ 指向一个进程的堆栈						│			*/
+    u32	ss;			/*  ┛						┷High			*/
 }STACK_FRAME;
 
 
@@ -56,83 +59,56 @@ typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 //要恢复一个进程时,将esp指针指向这个结构体的开始处,然后一系列pop将寄存器的数值弹出
 typedef struct s_proc {
 
-	//前部分是所有相关寄存器的数值 process registers saved in stack frame
-	STACK_FRAME regs;
+    //前部分是所有相关寄存器的数值 process registers saved in stack frame
+    STACK_FRAME regs;
 
-	//GDT一个选择子(内含描述符索引,可得到描述符),给出了进程LDT表的基址与段限
-	u16 ldt_sel;
+    //GDT一个选择子(内含描述符索引,可得到描述符),给出了进程LDT表的基址与段限
+    u16 ldt_sel;
 
-	//进程LDT表 local descriptors for code and data
-	DESCRIPTOR ldts[LDT_SIZE];
+    //进程LDT表 local descriptors for code and data
+    DESCRIPTOR ldts[LDT_SIZE];
 
-	//process id passed in from MM
-	u32 pid;
+    //process id passed in from MM
+    u32 pid;
 
-	//name of the process
-	char p_name[16];
+    //name of the process
+    char p_name[16];
 
-	/*-----------------进程调度相关变量-------------------*/
+    /*-----------------进程调度相关变量-------------------*/
 
-	//标识这个进程是否在睡眠状态,睡眠状态为1,不被分配时间片
-	int is_sleep;
+    //标识这个进程是否在睡眠状态,睡眠状态为1,不被分配时间片
+    int is_sleep;
 
-	//表示在睡眠状态下的进程要睡眠的时间
-	int sleep_time;
+    //表示在睡眠状态下的进程要睡眠的时间
+    int sleep_time;
 
-	//remained ticks,递减从初值到0,减到0之后,此进程就不再获得执行的机会
-	int ticks;
+    //remained ticks,递减从初值到0,减到0之后,此进程就不再获得执行的机会
+    int ticks;
 
-	//恒定不变的优先度,当所有的进程ticks都减到0之后,
-	//再把各自的ticks赋值为priority,以便继续执行
-	int priority;
+    //恒定不变的优先度,当所有的进程ticks都减到0之后,
+    //再把各自的ticks赋值为priority,以便继续执行
+    int priority;
 
-
+    struct s_proc * next;
 
 }PROCESS;
 
 
-
 typedef struct s_task {
-	//任务对应的函数指针
-	task_f	initial_eip;
+    //任务对应的函数指针
+    task_f	initial_eip;
 
-	//进程自己的栈
-	int		stacksize;
+    //进程自己的栈
+    int		stacksize;
 
-	//名称
-	char	name[32];
+    //名称
+    char	name[32];
 }TASK;
 
-
-
-//信号量结构体
-typedef struct semaphore {
-	//信号量数值
-	int	value;
-
-	//名称
-	char name[32];
-
-	//信号量等待队列
-	PROCESS* waiting_list[NR_TASKS];
-
-	//第一个等待进程指针的位置
-	int first;
-	//最后一个等待进程指针的位置后面的空闲位置
-	int availbale;
-}SIGNAL;
-
-
-
-/* syscall.asm */
-PUBLIC  int     my_get_ticks();
-PUBLIC  int     my_process_sleep(int mill_seconds);
-PUBLIC  int     my_disp_str(char* str,int color);
-PUBLIC  int     my_sem_p(SIGNAL* signal);
-PUBLIC  int     my_sem_v(SIGNAL* signal);
+/* sys_call */
 
 // 0,返回ticks的数值
-PUBLIC int sys_get_ticks();        /* sys_call */
+PUBLIC int sys_get_ticks();
 
 // 1,接受一个 int 型参数 mill_seconds,调用此 System Call 的进程会在 mill_seconds 毫秒内不被 进程调度函数分配时间片。
 PUBLIC void sys_process_sleep();
@@ -147,3 +123,6 @@ PUBLIC void sys_sem_p();
 PUBLIC void sys_sem_v();
 
 
+
+
+#endif //MULTIPLEPROCESS_PROCC_H

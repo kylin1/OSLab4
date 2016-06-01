@@ -5,15 +5,12 @@
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#include "type.h"
-#include "const.h"
-#include "protect.h"
-#include "proto.h"
-#include "string.h"
-#include "proc.h"
 #include "global.h"
+#include "list.h"
 #include "klib.h"
+#include "proto.h"
 #include "clock.h"
+#include "string.h"
 
 /*-----------变量区域--------------------*/
 
@@ -29,19 +26,37 @@ PRIVATE int waiting;
 
 //信号量表,初始化信号量
 PRIVATE SIGNAL signal_table[3] = {
-		//value, name,		list,first,available
-		{0,	"!customers! ",		0,	0,	0},
-		{0,	"!barbers! ",		0,	0,	0},
-		{1,	"!mutex! ",			0,	0,	0}
+		//	name		value,  list
+		{"!customers! ",	0,	0},
+		{"!barbers! ",		0,	0},
+		{"!mutex! ",		1,	0}
+};
+
+PRIVATE LIST waiting_list_table[3] = {
+		{"list1 cus",0,0,0},
+		{"list2 bar",0,0,0},
+		{"list3 mutex",0,0,0}
 };
 
 //信号量指针
-PRIVATE SIGNAL* p_customers = signal_table;
-PRIVATE SIGNAL* p_barbers = signal_table + 1;
-PRIVATE SIGNAL* p_mutex = signal_table + 2;
+PRIVATE SIGNAL* p_customers;
+PRIVATE SIGNAL* p_barbers;
+PRIVATE SIGNAL* p_mutex;
 
 
 /*-----------私有方法区域--------------------*/
+
+
+//初始化信号量指针与信号量的等待队列
+PRIVATE void init_waiting_list(){
+	p_customers = signal_table;
+	p_barbers = signal_table + 1;
+	p_mutex = signal_table + 2;
+
+	p_customers->waiting_list = waiting_list_table;
+	p_barbers->waiting_list = waiting_list_table+1;
+	p_mutex->waiting_list = waiting_list_table+2;
+}
 
 //理发师理发消耗两个时间片
 PRIVATE void cut_hair(){
@@ -178,6 +193,8 @@ PUBLIC int kernel_main()
 	waiting = 0;
 	customer_id = 0;
 
+	init_waiting_list();
+
 
 	//设置首先启动的进程
 	p_proc_ready	= proc_table;
@@ -192,6 +209,7 @@ PUBLIC int kernel_main()
 	clear_screen();
 	while(1){}
 }
+
 
 /*======================================================================*
                                TestA

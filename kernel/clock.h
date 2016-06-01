@@ -7,7 +7,7 @@
 #ifndef MULTIPLEPROCESS_CLOCK_H
 #define MULTIPLEPROCESS_CLOCK_H
 
-#endif //MULTIPLEPROCESS_CLOCK_H
-
 PUBLIC void milli_delay(int milli_sec);
 PUBLIC void init_clock();
+
+#endif //MULTIPLEPROCESS_CLOCK_H

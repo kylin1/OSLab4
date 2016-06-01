@@ -4,12 +4,12 @@
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-#include "string.h"
 
-#include "proc.h"
+#include "string.h"
 #include "proto.h"
 
 #include "global.h"
+#include "list.h"
 
 /*======================================================================*
                               schedule
@@ -106,12 +106,8 @@ void sys_sem_p(){
 		PROCESS * proc_tobe_sleep = p_proc_ready;
 		proc_tobe_sleep->is_sleep = 1;
 
-		//加入等待队列的空闲位置,移入信号量等待队列
-		int available = signal->availbale;
-
-		signal->waiting_list[available] = proc_tobe_sleep;
-		//移动空闲指针
-		signal->availbale = (signal->availbale + 1) % NR_TASKS;
+		//移入信号量等待队列
+		list_add(signal->waiting_list,proc_tobe_sleep);
 	}
 	//转向调度程序
 	schedule();
@@ -135,18 +131,14 @@ void sys_sem_v(){
 
 	//有别的进程在等待
 	if(signal->value <= 0){
-		//释放一个等待信号量S的进程,改成就绪状态
-		int first = signal->first;
-		PROCESS * tobe_wake_up = signal->waiting_list[first];
-		tobe_wake_up->is_sleep = 0;
-
-		//first向下移动
-		signal->first = (signal->first + 1) % NR_TASKS;
+		//释放第一个等待信号量S的进程,改成就绪状态
+		LIST * list = signal->waiting_list;
+		PROCESS * tobe_wake_up = list->first;
+		list_remove(list);
 
 		//移入就绪队列
-//		p_proc_ready = tobe_wake_up;
-	}
 
+	}
 	enable_int();
-	//执行V操作的进程继续返回执行
+	//执行V操作的进程继续执行
 }

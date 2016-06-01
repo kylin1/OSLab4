@@ -18,44 +18,40 @@
  *======================================================================*/
 PUBLIC void schedule() {
 
-//	//当下一个进程还有ticks就返回,使得其他进程不会有机会获得执行
-//	if (p_proc_ready->ticks > 0) {
-//		return;
-//	}
+	//CPU调度使用的就绪队列
+	LIST * ready_list = list_table;
 
 	PROCESS* p;
 	int	greatest_ticks = 0;
 
-	while (!greatest_ticks) {
-
-		//对于每一个进程
-		for (p = proc_table; p < proc_table+NR_TASKS; p++) {
-			//如果这个进程在睡眠状态,则不分配时间片,跳过它
-			if(p->is_sleep == 1){
-				continue;
-			}
-			//如果这个进程剩余的ticks比最大的大
-			else if (p->ticks > greatest_ticks) {
-
-				//最大剩余ticks = 这个进程的值
-				greatest_ticks = p->ticks;
-				//下一个进程设为p
-				p_proc_ready = p;
-			}
-		}//循环结束之后,下一个进程就是剩余ticks最大的进程
-
-
-		//下面的代码会导致系统无限循环打印ABC而一段时间后产生异常
-
-		//当剩余最大的ticks就是0了,所有的进程都需要再次分配
-		if (!greatest_ticks) {
-			for (p = proc_table; p < proc_table+NR_TASKS; p++) {
-				//ticks设置为初始值
-				p->ticks = p->priority;
-			}
+	//找到剩余ticks的最大值
+	for (p = proc_table; p < proc_table+NR_TASKS; p++) {
+		if (p->ticks > greatest_ticks) {
+			greatest_ticks = p->ticks;
 		}
 	}
-	//讲道理下面应该会切换到restart函数
+	//当剩余最大的ticks就是0了,所有的进程都需要再次分配
+	if (!greatest_ticks) {
+		for (p = proc_table; p < proc_table+NR_TASKS; p++) {
+			//ticks设置为初始值
+			p->ticks = p->priority;
+		}
+	}
+
+	//在就绪队列中执行时间片轮转调度算法
+
+	//把正在运行的当前进程暂时保存
+	PROCESS * tobe_last = p_proc_ready;
+
+	//下一个进程是当前就绪队列的第一个进程
+	p_proc_ready = ready_list->first;
+	p_proc_ready->state = RUNNING;
+	list_remove(ready_list);
+
+	//将现在正在运行的进程加入就绪队列的尾部,等候下一轮调度
+	tobe_last->state = RUNNABLE;
+	list_add(ready_list,tobe_last);
+
 }
 
 /*======================================================================*
@@ -69,21 +65,16 @@ int sys_get_ticks() {
  * 调用此 System Call 的进程会在 mill_seconds 毫秒内不被进程调度函数分配时间片
  */
 void sys_process_sleep() {
+	//参数:睡眠时间
 	int mill_seconds = p_proc_ready->regs.ebx;
 	disp_int(mill_seconds);
 
-	//关中断
-	disable_int();
-
 	//睡眠当前进程
-	p_proc_ready->is_sleep = 1;
+	p_proc_ready->state = SLEEP;
 	p_proc_ready->sleep_time = mill_seconds;
 
 	//调度进程
 	schedule();
-
-	//开中断
-	enable_int();
 }
 
 /**
@@ -94,9 +85,6 @@ void sys_sem_p(){
 	disp_str("!p ask for : ");
 	disp_str(signal->name);
 
-	//关中断
-	disable_int();
-
 	//申请使用信号量物理值
 	signal->value --;
 
@@ -104,27 +92,23 @@ void sys_sem_p(){
 	if(signal->value < 0){
 		//则调用此方法的进程阻塞自己,设置自己为等待此信号量状态
 		PROCESS * proc_tobe_sleep = p_proc_ready;
-		proc_tobe_sleep->is_sleep = 1;
+		proc_tobe_sleep->state = SLEEP;
 
 		//移入信号量等待队列
 		list_add(signal->waiting_list,proc_tobe_sleep);
 	}
 	//转向调度程序
 	schedule();
-
-	//开中断
-	enable_int();
 }
 
 /**
  * 信号量的 PV 操作
  */
 void sys_sem_v(){
+	//在kernel.asm里面已经关闭了中断,下面的整个过程都是关中断的
 	SIGNAL* signal = (SIGNAL *) p_proc_ready->regs.ebx;
 	disp_str("!v release : ");
 	disp_str(signal->name);
-	//关中断
-	disable_int();
 
 	//归还信号量物理值
 	signal->value ++;
@@ -134,11 +118,15 @@ void sys_sem_v(){
 		//释放第一个等待信号量S的进程,改成就绪状态
 		LIST * list = signal->waiting_list;
 		PROCESS * tobe_wake_up = list->first;
+		tobe_wake_up->state = RUNNABLE;
+
 		list_remove(list);
 
-		//移入就绪队列
+		//CPU调度使用的就绪队列
+		LIST * ready_list = list_table;
 
+		//移入就绪队列
+		list_add(ready_list,tobe_wake_up);
 	}
-	enable_int();
 	//执行V操作的进程继续执行
 }

@@ -56,6 +56,8 @@ PRIVATE void init_waiting_list(){
 	p_customers->waiting_list = waiting_list_table;
 	p_barbers->waiting_list = waiting_list_table+1;
 	p_mutex->waiting_list = waiting_list_table+2;
+
+	p_mutex->value = 1;
 }
 
 //理发师理发消耗两个时间片
@@ -84,16 +86,17 @@ PRIVATE void clear_screen() {
 	disp_pos = 0;
 }
 
-PRIVATE void show_process_name(){
-	my_disp_str("process name : ",GREY);
-	my_disp_str(p_proc_ready->p_name,GREY);
+PRIVATE void show_process_name(int color){
+	my_disp_str("\n",color);
+	my_disp_str("process name : ",color);
+	my_disp_str(p_proc_ready->p_name,color);
 }
 
 PRIVATE void wait_sometime(){
 	milli_delay(WAIT_TIMES);
 }
 
-PRIVATE void check_int(int input,char * str){
+PUBLIC void check_int(int input,char * str){
 	my_disp_str(str,RED);
 	disp_int(input);
 }
@@ -166,8 +169,12 @@ PUBLIC int kernel_main()
 		p_task_stack -= p_task->stacksize;
 
 		/**------------进程调度信息-------------*/
-		p_proc->is_sleep = 0;
+		p_proc->state = RUNNABLE;
 		p_proc->sleep_time = 0;
+
+		//CPU调度使用的就绪队列
+		LIST * ready_list = list_table;
+		list_add(ready_list,p_proc);
 
 		//为下一个进程初始化:下一个描述符空间(+8)
 		p_proc++;
@@ -196,6 +203,8 @@ PUBLIC int kernel_main()
 	init_waiting_list();
 
 
+
+
 	//设置首先启动的进程
 	p_proc_ready	= proc_table;
 	//初始时钟中断
@@ -219,7 +228,7 @@ PUBLIC int kernel_main()
 void TestA() {
 	while (1) {
 		//普通进程、理发师进程和顾客进程用不同颜色打印
-		show_process_name();
+		show_process_name(GREY);
 		wait_sometime();
 	}
 }
@@ -228,7 +237,7 @@ void TestA() {
 //B进程是理发师
 void TaskB() {
 	while (1) {
-		show_process_name();
+		show_process_name(ORANGE);
 
 		//申请顾客customers-1,判断是否有顾客,无顾客,理发师去睡觉
 		my_sem_p(p_customers);
@@ -289,31 +298,30 @@ PRIVATE void customer_task(){
 
 }
 
+void task_customer(){
+	show_process_name(WHITE);
+	customer_task();
+	wait_sometime();
+}
 
 //C进程是顾客
 void TaskC() {
 	while (1) {
-		show_process_name();
-		customer_task();
-		wait_sometime();
+		task_customer();
 	}
 }
 
 //D进程是顾客
 void TaskD() {
 	while (1) {
-		show_process_name();
-		customer_task();
-		wait_sometime();
+		task_customer();
 	}
 }
 
 //E进程是顾客
 void TaskE() {
 	while (1) {
-		show_process_name();
-		customer_task();
-		wait_sometime();
+		task_customer();
 	}
 }
 

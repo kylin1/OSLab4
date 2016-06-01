@@ -1,4 +1,8 @@
 #include "list.h"
+#include "const.h"
+#include "proto.h"
+
+
 
 void list_add (LIST* list, PROCESS * new_proc){
     if(list->size == 0){
@@ -10,6 +14,7 @@ void list_add (LIST* list, PROCESS * new_proc){
         old_last->next = new_proc;
     }
     list->size ++;
+//    show_list(list);
 }
 
 void list_remove(LIST* list){
@@ -24,13 +29,21 @@ void list_remove(LIST* list){
         list->first = new_first;
     }
     list->size --;
+//    show_list(list);
+}
+
+void show_list(LIST* list){
+    my_disp_str("list name :",RED);
+    my_disp_str(list->name,RED);
+    my_disp_str("size :",RED);
+    disp_int(list->size);
+    PROCESS * this_one = list->first;
+    while (this_one != 0){
+        my_disp_str(this_one->p_name,RED);
+        my_disp_str(" --> ",RED);
+        this_one = this_one->next;
+    }
+    my_disp_str(" list end",RED);
 }
 
 
-
-PUBLIC LIST list_table[3] = {
-        //进程就绪队列,低级调度使用
-        {"ready_list",0,0,0},
-        {"sleep_list",0,0,0},
-        {"some_list",0,0,0}
-};

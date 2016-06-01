@@ -24,7 +24,7 @@ PUBLIC void clock_handler(int irq)
 	//时钟中断处理数目加1
 	ticks++;
 
-	//下一个要开始的进程的ticks-1
+	//当前进程的ticks-1
 	p_proc_ready->ticks--;
 
 	//如果中断重入,函数直接返回,不做任何操作

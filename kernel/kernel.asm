@@ -382,7 +382,7 @@ sys_call:
 
 
 
-        ;eax是在syscall.asm里面设置好的顺序
+        ;eax是在syscall.asm里面设置好的顺序,在关闭中断的情况下执行对应的中断处理程序
         ;调用sys_call_table的第eax个函数
         ;(里面存放了函数名,函数指针数组,例如sys_get_ticks是第0个)
         call    [sys_call_table + eax * 4]

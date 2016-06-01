@@ -105,5 +105,16 @@
 
 #define WAIT_TIMES     2000
 
+//进程状态
+
+//睡眠,登台状态
+#define SLEEP     1
+
+//等待信号结束,或者时间片使用完的的就绪状态
+#define RUNNABLE     2
+
+//正在运行状态
+#define RUNNING     3
+
 #endif /* _ORANGES_CONST_H_ */
 

@@ -12,6 +12,8 @@
 #include "proc.h"
 #include "tty.h"
 #include "console.h"
+#include "list.h"
+#include "const.h"
 
 #ifdef	GLOBAL_VARIABLES_HERE
 #undef	EXTERN
@@ -36,7 +38,7 @@ EXTERN	int		nr_current_console;
 extern	PROCESS		proc_table[];
 extern	char		task_stack[];
 extern  TASK            task_table[];
-
+extern  LIST list_table[];
 extern	irq_handler	irq_table[];
 extern	TTY		tty_table[];
 extern  CONSOLE         console_table[];

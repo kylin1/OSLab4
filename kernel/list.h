@@ -37,15 +37,9 @@ void list_add (LIST* list, PROCESS * new_proc);
 
 void list_remove(LIST* list);
 
-
-/* syscall.asm */
-PUBLIC  int     my_get_ticks();
-PUBLIC  int     my_process_sleep(int mill_seconds);
-PUBLIC  int     my_disp_str(char* str,int color);
-PUBLIC  int     my_sem_p(SIGNAL* signal);
-PUBLIC  int     my_sem_v(SIGNAL* signal);
+void show_list(LIST* list);
 
 
-extern LIST list_table[];
+
 
 #endif //MULTIPLEPROCESS_MY_LIST_H

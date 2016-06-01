@@ -32,9 +32,12 @@ PUBLIC	TASK	task_table[NR_TASKS] = {
 PUBLIC	TTY		tty_table[NR_CONSOLES];
 PUBLIC	CONSOLE		console_table[NR_CONSOLES];
 
-
-
-
+PUBLIC LIST list_table[3] = {
+		//进程就绪队列,低级调度使用
+		{"ready_list",0,0,0},
+		{"sleep_list",0,0,0},
+		{"some_list",0,0,0}
+};
 
 
 //中断向量表,中断处理程序

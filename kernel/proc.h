@@ -7,9 +7,10 @@
                                                     Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /* Number of tasks */
-#include "const.h"
+
 #include "type.h"
 #include "protect.h"
+#include "const.h"
 
 #define NR_TASKS	5
 
@@ -76,8 +77,8 @@ typedef struct s_proc {
 
     /*-----------------进程调度相关变量-------------------*/
 
-    //标识这个进程是否在睡眠状态,睡眠状态为1,不被分配时间片
-    int is_sleep;
+    //标识这个进程是的状态
+    int state;
 
     //表示在睡眠状态下的进程要睡眠的时间
     int sleep_time;
@@ -105,24 +106,6 @@ typedef struct s_task {
     char	name[32];
 }TASK;
 
-/* sys_call */
-
-// 0,返回ticks的数值
-PUBLIC int sys_get_ticks();
-
-// 1,接受一个 int 型参数 mill_seconds,调用此 System Call 的进程会在 mill_seconds 毫秒内不被 进程调度函数分配时间片。
-PUBLIC void sys_process_sleep();
-
-// 2,接受一个 char* str 参数, 打印出 字符串。
-PUBLIC void sys_disp_str();
-
-// 3,信号量的 PV 操作
-PUBLIC void sys_sem_p();
-
-// 4,信号量的 PV 操作
-PUBLIC void sys_sem_v();
-
-
-
+PUBLIC void schedule();
 
 #endif //MULTIPLEPROCESS_PROCC_H

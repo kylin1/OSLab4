@@ -8,7 +8,7 @@
 #define MULTIPLEPROCESS_KLIB_H
 
 PUBLIC void enable_irq(int irq);
-PUBLIC void disp_int(int input);
+PUBLIC void disp_int(int input,int color);
 PUBLIC void delay(int time);
 PUBLIC char * itoa(char * str, int num);
 

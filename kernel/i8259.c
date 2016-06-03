@@ -48,7 +48,7 @@ PUBLIC void init_8259A()
 PUBLIC void spurious_irq(int irq)
 {
 	disp_str("spurious_irq: ");
-	disp_int(irq);
+	disp_int(irq,GREY);
 	disp_str("\n");
 }
 

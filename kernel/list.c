@@ -1,7 +1,7 @@
 #include "list.h"
 #include "const.h"
 #include "proto.h"
-
+#include "klib.h"
 
 
 void list_add (LIST* list, PROCESS * new_proc){
@@ -36,7 +36,7 @@ void show_list(LIST* list){
     my_disp_str("list name :",RED);
     my_disp_str(list->name,RED);
     my_disp_str("size :",RED);
-    disp_int(list->size);
+    disp_int(list->size,RED);
     PROCESS * this_one = list->first;
     while (this_one != 0){
         my_disp_str(this_one->p_name,RED);

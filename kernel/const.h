@@ -113,10 +113,17 @@
 #define RUNNABLE     2
 
 //一秒100次,也就是10ms时钟中断一次,一个时间片也就是10ms
-#define HZ             100  /* clock freq (software settable on IBM-PC) */
+#define HZ             1  /* clock freq (software settable on IBM-PC) */
 
 //一个时间片的时间长度
 int ms_per_ticks;
+
+
+#define CHAIR_NUM  3
+
+#define DEBUG  0
+
+
 
 #endif /* _ORANGES_CONST_H_ */
 

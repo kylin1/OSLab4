@@ -55,11 +55,11 @@ PUBLIC char * itoa(char * str, int num)/* 数字前面的 0 不被显示出来, 
 /*======================================================================*
                                disp_int
  *======================================================================*/
-PUBLIC void disp_int(int input)
+PUBLIC void disp_int(int input,int color)
 {
 	char output[16];
 	itoa(output, input);
-	disp_str(output);
+	disp_color_str(output,color);
 }
 
 /*======================================================================*

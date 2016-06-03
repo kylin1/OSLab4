@@ -10,6 +10,7 @@
 
 #include "global.h"
 #include "list.h"
+#include "klib.h"
 
 /*======================================================================*
                               schedule
@@ -41,21 +42,15 @@ PUBLIC void schedule() {
 
 	//找到下一个是可运行状态的进程
 	do{
-		//切换到下一个进程
+		//首先要切换到下一个进程
 		change_proc();
-
-		if(p_proc_ready->sleep_ticks == -1){
-			continue;
-		}
 
 		//如果这个进程不是可运行的,则继续切换
 		if(p_proc_ready->state != RUNNABLE){
 			continue;
 		}
 
-
-
-		//睡眠时间片大于0,则继续切换
+		//睡眠时间片大于0,表明这个进程需要睡觉,则继续切换
 	}while(p_proc_ready->sleep_ticks > 0);
 }
 
@@ -78,9 +73,11 @@ void sys_process_sleep() {
 	//需要睡眠的时间片个数 = 睡眠时间ms/一个时间片的时间ms
 	p_proc_ready->sleep_ticks = mill_seconds/ms_per_ticks + 1;
 
-	disp_color_str(p_proc_ready->p_name,BRIGHT);
-	disp_color_str("will sleep ticks:",BRIGHT);
-	disp_int(p_proc_ready->sleep_ticks);
+	if(DEBUG){
+		disp_color_str(p_proc_ready->p_name,BRIGHT);
+		disp_color_str("will sleep ticks:",BRIGHT);
+		disp_int(p_proc_ready->sleep_ticks,BRIGHT);
+	}
 
 	schedule();
 }
@@ -93,10 +90,11 @@ void sys_sem_p(){
 
 	SIGNAL* signal = (SIGNAL *) p_proc_ready->regs.ebx;
 
-
-	disp_color_str(p_proc_ready->p_name,ORANGE);
-	disp_color_str(" ask for:",ORANGE);
-	disp_color_str(signal->name,ORANGE);
+	if(DEBUG){
+		disp_color_str(p_proc_ready->p_name,ORANGE);
+		disp_color_str(" ask for:",ORANGE);
+		disp_color_str(signal->name,ORANGE);
+	}
 
 	//申请使用信号量物理值
 	signal->value --;
@@ -116,18 +114,22 @@ void sys_sem_p(){
 		//移入信号量等待队列
 		list_add(signal->waiting_list,proc_tobe_sleep);
 
-
-		disp_color_str(proc_tobe_sleep->p_name,ORANGE);
-		disp_color_str(" :fail going sleep",ORANGE);
-
+		if(DEBUG){
+			disp_color_str(proc_tobe_sleep->p_name,ORANGE);
+			disp_color_str(" :fail going sleep",ORANGE);
+		}
 
 		//释放CPU,转向调度程序
 		schedule();
 
 		//信号量可以用
 	}else{
-		disp_color_str(p_proc_ready->p_name,ORANGE);
-		disp_color_str(" :success",ORANGE);
+
+		if(DEBUG){
+			disp_color_str(p_proc_ready->p_name,ORANGE);
+			disp_color_str(" :success",ORANGE);
+		}
+
 	}
 }
 
@@ -137,17 +139,23 @@ void sys_sem_p(){
 void sys_sem_v(){
 	//在kernel.asm里面已经关闭了中断,下面的整个过程都是关中断的
 	SIGNAL* signal = (SIGNAL *) p_proc_ready->regs.ebx;
-	disp_color_str(p_proc_ready->p_name,GREEN);
-	disp_color_str(" release : ",GREEN);
-	disp_color_str(signal->name,GREEN);
+
+	if(DEBUG){
+		disp_color_str(p_proc_ready->p_name,GREEN);
+		disp_color_str(" release : ",GREEN);
+		disp_color_str(signal->name,GREEN);
+	}
 
 	//归还信号量物理值
 	signal->value ++;
 
 	//有别的进程在等待
 	if(signal->value <= 0){
-		disp_color_str(p_proc_ready->p_name,GREEN);
-		disp_color_str(" will wakeup:",GREEN);
+
+		if(DEBUG){
+			disp_color_str(p_proc_ready->p_name,GREEN);
+			disp_color_str(" will wakeup:",GREEN);
+		}
 
 		//释放第一个等待信号量S的进程,改成就绪状态
 		LIST * list = signal->waiting_list;
@@ -160,10 +168,15 @@ void sys_sem_v(){
 		tobe_wake_up->state = RUNNABLE;
 		tobe_wake_up->sleep_ticks = 0;
 
+		if(DEBUG){
+			disp_color_str(tobe_wake_up->p_name,GREEN);
+		}
 
-		disp_color_str(tobe_wake_up->p_name,GREEN);
 	}else{
-		disp_color_str(" wake no one ",GREEN);
+
+		if(DEBUG){
+			disp_color_str(" wake no one ",GREEN);
+		}
 	}
 	//执行V操作的进程继续执行
 }

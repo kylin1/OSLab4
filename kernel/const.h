@@ -112,11 +112,11 @@
 //等待信号结束,或者时间片使用完的的就绪状态
 #define RUNNABLE     2
 
-//正在运行状态
-#define RUNNING     3
+//一秒100次,也就是10ms时钟中断一次,一个时间片也就是10ms
+#define HZ             100  /* clock freq (software settable on IBM-PC) */
 
-//一秒100次,也就是10ms时钟中断一次
-#define HZ             50  /* clock freq (software settable on IBM-PC) */
+//一个时间片的时间长度
+int ms_per_ticks;
 
 #endif /* _ORANGES_CONST_H_ */
 

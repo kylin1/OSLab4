@@ -80,8 +80,8 @@ typedef struct s_proc {
     //标识这个进程是的状态
     int state;
 
-    //表示在睡眠状态下的进程要睡眠的时间
-    int sleep_time;
+    //表示在睡眠状态下的进程要睡眠的时间片数目
+    int sleep_ticks;
 
     //remained ticks,递减从初值到0,减到0之后,此进程就不再获得执行的机会
     int ticks;

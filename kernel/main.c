@@ -60,41 +60,26 @@ PRIVATE void init_waiting_list(){
 	p_mutex->value = 1;
 }
 
-//理发师理发消耗两个时间片
-PRIVATE void cut_hair(){
-	// 打印基本操作:理发师剪发
-	my_disp_str("barber is serving customer_same ",GREEN);
-}
-
-PRIVATE void get_haircut(int customer_id){
-	// 打印基本操作:理发师剪发
-	my_disp_str("customer_same ",GREEN);
-	disp_int(customer_id);
-	my_disp_str("is being served ",GREEN);
-	//顾客理发结束
-	my_disp_str("customer_same id = ",RED);
-	disp_int(customer_id);
-	my_disp_str("DONE! ",RED);
-}
 
 PRIVATE void clear_screen() {
 	int i;
 	disp_pos = 0;
 	for (i = 0; i < 80 * 20; i++) {
-		disp_str(" ");
+		disp_color_str(" ",GREY);
 	}
 	disp_pos = 0;
 }
 
 PRIVATE void show_process_name(int color){
-	my_disp_str("\n",color);
-	my_disp_str("process name : ",color);
-	my_disp_str(p_proc_ready->p_name,color);
+	disp_color_str("\n",color);
+	disp_color_str("process name : ",color);
+	disp_color_str(p_proc_ready->p_name,color);
 }
 
 
-PUBLIC void check_int(int input,char * str){
-	my_disp_str(str,RED);
+PUBLIC void check_int(char * str,int input,int color){
+	disp_color_str(" ",color);
+	disp_color_str(str,color);
 	disp_int(input);
 }
 
@@ -109,6 +94,8 @@ PUBLIC int kernel_main()
 	//任务表与进程信息,在global.c里面初始化
 	TASK*		p_task		= task_table;
 	PROCESS*	p_proc		= proc_table;
+
+	PROCESS*	proc_barber = proc_table + 1;
 
 	//所有进程的栈,在global.c里面声明了空间
 	char*		p_task_stack	= task_stack + STACK_SIZE_TOTAL;
@@ -137,21 +124,21 @@ PUBLIC int kernel_main()
 
 		//cs指向LDT中第一个描述符
 		p_proc->regs.cs	= ((8 * 0) & SA_RPL_MASK & SA_TI_MASK)
-			| SA_TIL | RPL_TASK;
+							 | SA_TIL | RPL_TASK;
 
 		//ds,es,fs,ss都指向LDT中第二个描述符
 		p_proc->regs.ds	= ((8 * 1) & SA_RPL_MASK & SA_TI_MASK)
-			| SA_TIL | RPL_TASK;
+							 | SA_TIL | RPL_TASK;
 		p_proc->regs.es	= ((8 * 1) & SA_RPL_MASK & SA_TI_MASK)
-			| SA_TIL | RPL_TASK;
+							 | SA_TIL | RPL_TASK;
 		p_proc->regs.fs	= ((8 * 1) & SA_RPL_MASK & SA_TI_MASK)
-			| SA_TIL | RPL_TASK;
+							 | SA_TIL | RPL_TASK;
 		p_proc->regs.ss	= ((8 * 1) & SA_RPL_MASK & SA_TI_MASK)
-			| SA_TIL | RPL_TASK;
+							 | SA_TIL | RPL_TASK;
 
 		//gs还是指向显存
 		p_proc->regs.gs	= (SELECTOR_KERNEL_GS & SA_RPL_MASK)
-			| RPL_TASK;
+							 | RPL_TASK;
 
 		//eip(指令地址)指向  initial_eip(task_f类型,函数指针)
 		p_proc->regs.eip = (u32)p_task->initial_eip;
@@ -167,11 +154,9 @@ PUBLIC int kernel_main()
 
 		/**------------进程调度信息-------------*/
 		p_proc->state = RUNNABLE;
-		p_proc->sleep_time = 0;
+		p_proc->sleep_ticks = 0;
 
-		//CPU调度使用的就绪队列
-		LIST * ready_list = list_table;
-		list_add(ready_list,p_proc);
+
 
 		//为下一个进程初始化:下一个描述符空间(+8)
 		p_proc++;
@@ -179,12 +164,16 @@ PUBLIC int kernel_main()
 		selector_ldt += 1 << 3;
 	}
 
+//	//CPU调度使用的就绪队列
+//	LIST * ready_list = list_table;
+//	list_add(ready_list,p_proc);
+
 	//初始化优先级别与可以获得的ticks数目
-	proc_table[0].ticks = proc_table[0].priority =  100;
-	proc_table[1].ticks = proc_table[1].priority =  100;
-	proc_table[2].ticks = proc_table[2].priority =  100;
-	proc_table[3].ticks = proc_table[3].priority =  100;
-	proc_table[4].ticks = proc_table[4].priority =  100;
+	proc_table[0].ticks = proc_table[0].priority =  5;
+	proc_table[1].ticks = proc_table[1].priority =  5;
+	proc_table[2].ticks = proc_table[2].priority =  5;
+	proc_table[3].ticks = proc_table[3].priority =  5;
+	proc_table[4].ticks = proc_table[4].priority =  5;
 
 	//中断重入
 	k_reenter = 0;
@@ -196,63 +185,96 @@ PUBLIC int kernel_main()
 	waiting = 0;
 	customer_id = 0;
 
+	//一个时间片的时间长度 (ms为单位)
+	//例如 HZ = 100,则time_piece = 10ms,时间片长10MS一个
+	ms_per_ticks = 1000/HZ;
+
+	clear_screen();
 	init_waiting_list();
 
 	//设置首先启动的进程
 	p_proc_ready	= proc_table;
 	//初始时钟中断
 	init_clock();
-	clear_screen();
 
-	//ring0 到 ring1(系统到用户)跳转
 	//第四步,调用kernel.asm的restart函数,启动用户进程
 	restart();
-
-	//开始时理发师处于沉睡状态。
-
 	while(1){}
 }
+
+
+
 
 /*======================================================================*
 							进程的任务
  *======================================================================*/
 
-
-PRIVATE void barber_task(){
-	//申请顾客customers-1,判断是否有顾客,无顾客,理发师去睡觉
-	my_sem_p(p_customers);
-
-	//运行至此,说明被顾客唤醒
-
-	/*-----------进入临界区 mutex-1-----------*/
-	my_sem_p(p_mutex);
-
-	//等候理发的顾客,占用的椅子数目-1
-	waiting --;
-
-	//理发师释放barbers+1,唤醒顾客,准备理发
-	my_sem_v(p_barbers);
-	my_sem_v(p_mutex);
-	/*-----------退出临界区 mutex+1-----------*/
-
-	//理发
-	cut_hair();
+void disp_ticks() {
+	int tic = sys_get_ticks();
+	disp_int(tic);
 }
 
+/**
+ * A进程普通进程
+ */
+void TestA() {
+	while (1) {
+		//普通进程、理发师进程和顾客进程用不同颜色打印
+		disp_ticks();
+	}
+}
 
-PRIVATE void customer_task(){
+/**
+ * 理发师作业
+ */
+void TaskB() {
+	while (1) {
+
+		disp_color_str("~~~BB start",PURPLE);
+
+		//申请顾客customers-1,判断是否有顾客,无顾客,理发师去睡觉
+		my_sem_p(p_customers);
+
+		//运行至此,说明被顾客唤醒
+		disp_color_str(" --wakeup by cus--",PURPLE);
+
+		/*-----------进入临界区 mutex-1-----------*/
+		my_sem_p(p_mutex);
+
+		//等候理发的顾客,占用的椅子数目-1
+		waiting --;
+
+		//理发师释放barbers+1,唤醒顾客,准备理发
+		my_sem_v(p_barbers);
+		my_sem_v(p_mutex);
+		/*-----------退出临界区 mutex+1-----------*/
+
+		//打印基本操作:理发师剪发
+		disp_color_str(" BB going cut",RED);
+
+		// 理发师理发消耗
+		my_process_sleep(3*ms_per_ticks);
+
+		disp_color_str(" BB sleep end~~~",PURPLE);
+	}
+}
+
+/**
+ * 顾客共同的进程作业
+ */
+void customer_same(){
+	disp_color_str("~~~cus start",PURPLE);
 
 	/*-----------进入临界区 mutex-1-----------*/
 	my_sem_p(p_mutex);
 
 	// 其中顾客要打印递增的顾客ID
 	customer_id ++;
-	check_int(customer_id,"customer_same arrive , id = ");
-	check_int(waiting,"waiting = ");
-	check_int(num_of_chair,"num_of_chair = ");
+	check_int(" cus arrive id:",customer_id,PURPLE);
 
 	//如果还有空的椅子,顾客先坐下
 	if(waiting < num_of_chair){
+		check_int(" cus id waiting ",customer_id,RED);
 		//等待的顾客占用的椅子数目+1
 		waiting ++;
 		//增加顾客的数目,customers+1,唤醒p操作等待的理发师
@@ -264,81 +286,37 @@ PRIVATE void customer_task(){
 		my_sem_p(p_barbers);
 
 		//走到这里,说明理发师不忙,可以理发,顾客得到服务
-		get_haircut(customer_id);
+		disp_color_str(" cus ",RED);
+		disp_int(customer_id);
+		disp_color_str("get service",RED);
 
-		//没有空的椅子,人满了,顾客离开
+
+		check_int("cus done! id:",customer_id,RED);
 	}else{
-		my_disp_str("FULL! customer_same leave , id = ",RED);
+		//没有空的椅子,人满了,顾客离开
+		disp_color_str("FULL! cus leave id:",RED);
+		my_sem_v(p_mutex);
 	}
-	// 顾客到来 并等待
-
+	check_int("cus done~~~id:",customer_id,PURPLE);
 }
-
-
-PRIVATE void wait_sometime(){
-	delay_ticks(20);
-}
-
-void disp_ticks(){
-	int tic = sys_get_ticks();
-	disp_int(tic);
-}
-
-/**
- * A进程普通进程
- */
-void TestA() {
-	while (1) {
-		//普通进程、理发师进程和顾客进程用不同颜色打印
-		show_process_name(GREY);disp_ticks();
-		wait_sometime();
-	}
-}
-
-/**
- * 理发师作业
- */
-void TaskB() {
-	while (1) {
-		show_process_name(ORANGE);disp_ticks();
-//		barber_task();
-		wait_sometime();
-	}
-}
-
-/**
- * 顾客共同的进程作业
- */
-void customer_same(){
-	show_process_name(WHITE);disp_ticks();
-//	customer_task();
-	wait_sometime();
-}
-
-
-
-
 
 
 
 //C进程是顾客
 void TaskC() {
-	while (1) {
-		customer_same();
-	}
+	customer_same();
+	while (1) { }
 }
 
 //D进程是顾客
 void TaskD() {
-	while (1) {
-		customer_same();
-	}
+	customer_same();
+	while (1) { }
 }
 
 //E进程是顾客
 void TaskE() {
-	while (1) {
-		customer_same();
-	}
+	customer_same();
+	while (1) { }
 }
 

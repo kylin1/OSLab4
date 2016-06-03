@@ -21,11 +21,11 @@ PUBLIC	char			task_stack[STACK_SIZE_TOTAL];
 
 PUBLIC	TASK	task_table[NR_TASKS] = {
 		//一个task: 函数指针,    栈的大小,     进程的名字
-					{TestA, STACK_SIZE_TESTA, "Normal    "},
-					{TaskB, STACK_SIZE_TESTB, "Barber    "},
-					{TaskC, STACK_SIZE_TESTC, "Customer1 "},
-					{TaskD, STACK_SIZE_TESTD, "Customer2 "},
-					{TaskE, STACK_SIZE_TESTE, "Customer3 "}
+					{TestA, STACK_SIZE_TESTA, "Normal "},
+					{TaskB, STACK_SIZE_TESTB, "Barber "},
+					{TaskC, STACK_SIZE_TESTC, "Cus1 "},
+					{TaskD, STACK_SIZE_TESTD, "Cus2 "},
+					{TaskE, STACK_SIZE_TESTE, "Cus3 "}
 				};
 
 

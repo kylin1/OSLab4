@@ -16,44 +16,47 @@
                             进程调度函数
                          被clock_handler调用(唯一一次被调用)
  *======================================================================*/
+
+
+//切换到进程表中的下一个进程
+void change_proc(){
+	p_proc_ready ++;
+	if (p_proc_ready >= proc_table + NR_TASKS) {
+		p_proc_ready = proc_table;
+	}
+}
+
 PUBLIC void schedule() {
+	PROCESS* p;
+	//调整按照时间片睡眠进程的睡眠时间
+	for(p = proc_table; p < proc_table+NR_TASKS; p++){
+		if(p->sleep_ticks > 0){
+			p->sleep_ticks--;
+		}
+			//睡眠时间到了,可以被唤醒
+		else if(p->sleep_ticks == 0 && p->state == SLEEP){
+			p->state = RUNNABLE;
+		}
+	}
 
-	//CPU调度使用的就绪队列
-	LIST * ready_list = list_table;
+	//找到下一个是可运行状态的进程
+	do{
+		//切换到下一个进程
+		change_proc();
 
-//	PROCESS* p;
-//	int	greatest_ticks = 0;
-//
-//	//找到剩余ticks的最大值
-//	for (p = proc_table; p < proc_table+NR_TASKS; p++) {
-//		if (p->ticks > greatest_ticks) {
-//			greatest_ticks = p->ticks;
-//		}
-//	}
-//	//当剩余最大的ticks就是0了,所有的进程都需要再次分配
-//	if (!greatest_ticks) {
-//		for (p = proc_table; p < proc_table+NR_TASKS; p++) {
-//			//ticks设置为初始值
-//			p->ticks = p->priority;
-//		}
-//	}
+		if(p_proc_ready->sleep_ticks == -1){
+			continue;
+		}
 
-	//----------在就绪队列中执行时间片轮转调度算法----------
+		//如果这个进程不是可运行的,则继续切换
+		if(p_proc_ready->state != RUNNABLE){
+			continue;
+		}
 
-	//把正在运行的当前进程暂时保存
-	PROCESS * tobe_last = p_proc_ready;
 
-	//下一个进程是当前就绪队列的第一个进程
-	p_proc_ready = ready_list->first;
-	p_proc_ready->state = RUNNING;
 
-	//从就绪队列中移除即将被执行的进程
-	list_remove(ready_list);
-
-	//将现在正在运行的进程加入就绪队列的尾部,等候下一轮调度
-	tobe_last->state = RUNNABLE;
-	list_add(ready_list,tobe_last);
-
+		//睡眠时间片大于0,则继续切换
+	}while(p_proc_ready->sleep_ticks > 0);
 }
 
 /*======================================================================*
@@ -69,13 +72,16 @@ int sys_get_ticks() {
 void sys_process_sleep() {
 	//参数:睡眠时间
 	int mill_seconds = p_proc_ready->regs.ebx;
-	disp_int(mill_seconds);
 
 	//睡眠当前进程
 	p_proc_ready->state = SLEEP;
-	p_proc_ready->sleep_time = mill_seconds;
+	//需要睡眠的时间片个数 = 睡眠时间ms/一个时间片的时间ms
+	p_proc_ready->sleep_ticks = mill_seconds/ms_per_ticks + 1;
 
-	//调度进程
+	disp_color_str(p_proc_ready->p_name,BRIGHT);
+	disp_color_str("will sleep ticks:",BRIGHT);
+	disp_int(p_proc_ready->sleep_ticks);
+
 	schedule();
 }
 
@@ -84,23 +90,41 @@ void sys_process_sleep() {
  */
 void sys_sem_p(){
 	SIGNAL* signal = (SIGNAL *) p_proc_ready->regs.ebx;
-	disp_str("!p ask for : ");
-	disp_str(signal->name);
+	disp_color_str(p_proc_ready->p_name,ORANGE);
+	disp_color_str(" ask for:",ORANGE);
+	disp_color_str(signal->name,ORANGE);
 
 	//申请使用信号量物理值
 	signal->value --;
 
 	//如果信号量不可以用
 	if(signal->value < 0){
+
+
 		//则调用此方法的进程阻塞自己,设置自己为等待此信号量状态
 		PROCESS * proc_tobe_sleep = p_proc_ready;
+
+
 		proc_tobe_sleep->state = SLEEP;
+		//无限睡眠直到被唤醒
+		proc_tobe_sleep->sleep_ticks = -1;
 
 		//移入信号量等待队列
 		list_add(signal->waiting_list,proc_tobe_sleep);
+
+
+		disp_color_str(proc_tobe_sleep->p_name,ORANGE);
+		disp_color_str(" :fail going sleep",ORANGE);
+
+
+		//释放CPU,转向调度程序
+		schedule();
+
+		//信号量可以用
+	}else{
+		disp_color_str(p_proc_ready->p_name,ORANGE);
+		disp_color_str(" :success",ORANGE);
 	}
-	//转向调度程序
-	schedule();
 }
 
 /**
@@ -109,26 +133,33 @@ void sys_sem_p(){
 void sys_sem_v(){
 	//在kernel.asm里面已经关闭了中断,下面的整个过程都是关中断的
 	SIGNAL* signal = (SIGNAL *) p_proc_ready->regs.ebx;
-	disp_str("!v release : ");
-	disp_str(signal->name);
+	disp_color_str(p_proc_ready->p_name,GREEN);
+	disp_color_str(" release : ",GREEN);
+	disp_color_str(signal->name,GREEN);
 
 	//归还信号量物理值
 	signal->value ++;
 
 	//有别的进程在等待
 	if(signal->value <= 0){
+		disp_color_str(p_proc_ready->p_name,GREEN);
+		disp_color_str(" will wakeup:",GREEN);
+
 		//释放第一个等待信号量S的进程,改成就绪状态
 		LIST * list = signal->waiting_list;
 		PROCESS * tobe_wake_up = list->first;
-		tobe_wake_up->state = RUNNABLE;
 
+		//将第一个进程从等待队列中移除
 		list_remove(list);
 
-		//CPU调度使用的就绪队列
-		LIST * ready_list = list_table;
+		//可以运行状态
+		tobe_wake_up->state = RUNNABLE;
+		tobe_wake_up->sleep_ticks = 0;
 
-		//移入就绪队列
-		list_add(ready_list,tobe_wake_up);
+
+		disp_color_str(tobe_wake_up->p_name,GREEN);
+	}else{
+		disp_color_str(" wake no one ",GREEN);
 	}
 	//执行V操作的进程继续执行
 }

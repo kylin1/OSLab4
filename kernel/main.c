@@ -256,7 +256,7 @@ void TaskB() {
 		disp_color_str(" BB is cutting\n",GREEN);
 
 		// 理发师理发消耗
-		my_process_sleep(2000*ms_per_ticks);
+		delay_ticks(2000);
 
 		if(DEBUG){
 			disp_color_str(" BB sleep end~~~\n",GREEN);
@@ -312,19 +312,22 @@ void customer_same(int customer_id){
 
 //C进程是顾客
 void TaskC() {
-
-	while (1) { customer_same(customer_id++);}
+	while (1) {
+		customer_same(customer_id++);
+	}
 }
 
 //D进程是顾客
 void TaskD() {
-
-	while (1) { customer_same(customer_id++);}
+	while (1) {
+		customer_same(customer_id++);
+	}
 }
 
 //E进程是顾客
 void TaskE() {
-
-	while (1) { customer_same(customer_id++);}
+	while (1) {
+		customer_same(customer_id++);
+	}
 }
 

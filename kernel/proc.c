@@ -89,7 +89,11 @@ void sys_process_sleep() {
  * 信号量的 PV 操作
  */
 void sys_sem_p(){
+
+
 	SIGNAL* signal = (SIGNAL *) p_proc_ready->regs.ebx;
+
+
 	disp_color_str(p_proc_ready->p_name,ORANGE);
 	disp_color_str(" ask for:",ORANGE);
 	disp_color_str(signal->name,ORANGE);
@@ -107,7 +111,7 @@ void sys_sem_p(){
 
 		proc_tobe_sleep->state = SLEEP;
 		//无限睡眠直到被唤醒
-		proc_tobe_sleep->sleep_ticks = -1;
+		proc_tobe_sleep->sleep_ticks = 100000000;
 
 		//移入信号量等待队列
 		list_add(signal->waiting_list,proc_tobe_sleep);

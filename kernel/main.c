@@ -210,6 +210,7 @@ PUBLIC int kernel_main()
  *======================================================================*/
 
 void disp_ticks() {
+	disp_str(" ");
 	int tic = sys_get_ticks();
 	disp_int(tic);
 }
@@ -221,6 +222,7 @@ void TestA() {
 	while (1) {
 		//普通进程、理发师进程和顾客进程用不同颜色打印
 		disp_ticks();
+		delay_ticks(1);
 	}
 }
 
@@ -253,7 +255,7 @@ void TaskB() {
 		disp_color_str(" BB going cut",RED);
 
 		// 理发师理发消耗
-		my_process_sleep(3*ms_per_ticks);
+		my_process_sleep(2*ms_per_ticks);
 
 		disp_color_str(" BB sleep end~~~",PURPLE);
 	}
@@ -262,14 +264,13 @@ void TaskB() {
 /**
  * 顾客共同的进程作业
  */
-void customer_same(){
+void customer_same(int customer_id){
 	disp_color_str("~~~cus start",PURPLE);
 
 	/*-----------进入临界区 mutex-1-----------*/
 	my_sem_p(p_mutex);
 
 	// 其中顾客要打印递增的顾客ID
-	customer_id ++;
 	check_int(" cus arrive id:",customer_id,PURPLE);
 
 	//如果还有空的椅子,顾客先坐下
@@ -286,6 +287,8 @@ void customer_same(){
 		my_sem_p(p_barbers);
 
 		//走到这里,说明理发师不忙,可以理发,顾客得到服务
+
+
 		disp_color_str(" cus ",RED);
 		disp_int(customer_id);
 		disp_color_str("get service",RED);
@@ -304,19 +307,19 @@ void customer_same(){
 
 //C进程是顾客
 void TaskC() {
-	customer_same();
+	customer_same(1);
 	while (1) { }
 }
 
 //D进程是顾客
 void TaskD() {
-	customer_same();
+	customer_same(2);
 	while (1) { }
 }
 
 //E进程是顾客
 void TaskE() {
-	customer_same();
+	customer_same(3);
 	while (1) { }
 }
 

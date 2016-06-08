@@ -222,7 +222,7 @@ void TestA() {
 	while (1) {
 		//普通进程、理发师进程和顾客进程用不同颜色打印
 //		my_process_sleep(1000*ms_per_ticks);
-		delay_ticks(1000);
+		delay_ticks(TIME);
 		disp_color_str(" Normal ",WHITE);
 	}
 }
@@ -257,7 +257,8 @@ void TaskB() {
 		disp_color_str(" & cutting some hair\n",GREEN);
 
 		// 理发师理发消耗
-		my_process_sleep(2000*ms_per_ticks);
+		my_process_sleep(TIME*ms_per_ticks);
+		my_process_sleep(TIME*ms_per_ticks);
 
 		if(DEBUG){
 			disp_color_str(" BB sleep end~~~\n",GREEN);
@@ -269,7 +270,7 @@ void TaskB() {
  * 顾客共同的进程作业
  */
 void customer_same(int customer_id){
-	my_process_sleep(1000*ms_per_ticks);
+	my_process_sleep(TIME*ms_per_ticks);
 
 	if(DEBUG){
 		disp_color_str("~~~cus start",ORANGE);

@@ -103,6 +103,9 @@ PUBLIC int kernel_main()
 	//为每一个进程在GDT中分配一个描述符来对应进程的LDT
 	u16		selector_ldt	= SELECTOR_LDT_FIRST;
 
+	//就绪队列
+	runnable_list   = list_table;
+
 	//初始化每一个进程
 	int i;
 	for (i = 0; i < NR_TASKS; i++) {
@@ -156,6 +159,8 @@ PUBLIC int kernel_main()
 		p_proc->state = RUNNABLE;
 		p_proc->sleep_ticks = 0;
 
+		//加入就绪队列
+		list_add(runnable_list,p_proc);
 
 
 		//为下一个进程初始化:下一个描述符空间(+8)
@@ -163,10 +168,6 @@ PUBLIC int kernel_main()
 		p_task++;
 		selector_ldt += 1 << 3;
 	}
-
-//	//CPU调度使用的就绪队列
-//	LIST * ready_list = list_table;
-//	list_add(ready_list,p_proc);
 
 	//初始化优先级别与可以获得的ticks数目
 	proc_table[0].ticks = proc_table[0].priority =  5;
@@ -181,7 +182,6 @@ PUBLIC int kernel_main()
 	ticks = 0;
 
 	/*------------理发师问题数据初始化------------*/
-
 	waiting = 0;
 	customer_id = 1;
 
@@ -221,8 +221,9 @@ void disp_ticks() {
 void TestA() {
 	while (1) {
 		//普通进程、理发师进程和顾客进程用不同颜色打印
-		disp_color_str(" normal ",WHITE);
+//		my_process_sleep(1000*ms_per_ticks);
 		delay_ticks(1000);
+		disp_color_str(" Normal ",WHITE);
 	}
 }
 
@@ -231,6 +232,7 @@ void TestA() {
  */
 void TaskB() {
 	while (1) {
+		//普通进程、理发师进程和顾客进程用不同颜色打印
 		if(DEBUG){
 			disp_color_str("~~~BB start",GREEN);
 		}
@@ -238,8 +240,8 @@ void TaskB() {
 		//申请顾客customers-1,判断是否有顾客,无顾客,理发师去睡觉
 		my_sem_p(p_customers);
 
-		//运行至此,说明被顾客唤醒
-		disp_color_str("barber wake up by cus",GREEN);
+		//运行至此,说明被顾客唤醒,打印基本操作:理发师剪发
+		disp_color_str("barber is waked up by customer",GREEN);
 
 		/*-----------进入临界区 mutex-1-----------*/
 		my_sem_p(p_mutex);
@@ -252,11 +254,10 @@ void TaskB() {
 		my_sem_v(p_mutex);
 		/*-----------退出临界区 mutex+1-----------*/
 
-		//打印基本操作:理发师剪发
-		disp_color_str(" BB is cutting\n",GREEN);
+		disp_color_str(" & cutting some hair\n",GREEN);
 
 		// 理发师理发消耗
-		delay_ticks(2000);
+		my_process_sleep(2000*ms_per_ticks);
 
 		if(DEBUG){
 			disp_color_str(" BB sleep end~~~\n",GREEN);
@@ -268,6 +269,7 @@ void TaskB() {
  * 顾客共同的进程作业
  */
 void customer_same(int customer_id){
+	my_process_sleep(1000*ms_per_ticks);
 
 	if(DEBUG){
 		disp_color_str("~~~cus start",ORANGE);
@@ -276,12 +278,9 @@ void customer_same(int customer_id){
 	/*-----------进入临界区 mutex-1-----------*/
 	my_sem_p(p_mutex);
 
-	// 其中顾客要打印递增的顾客ID
-	check_int(" cus arrive. id:",customer_id,ORANGE);
-
 	//如果还有空的椅子,顾客先坐下
 	if(waiting < CHAIR_NUM){
-		check_int(" cus waiting. id:",customer_id,ORANGE);
+		check_int("customer arrive & waiting. id:",customer_id,ORANGE);
 		//等待的顾客占用的椅子数目+1
 		waiting ++;
 		//增加顾客的数目,customers+1,唤醒p操作等待的理发师
@@ -293,19 +292,13 @@ void customer_same(int customer_id){
 		my_sem_p(p_barbers);
 
 		//走到这里,说明理发师不忙,可以理发,顾客得到服务
-		disp_color_str(" cus ",ORANGE);
-		disp_int(customer_id,ORANGE);
-		disp_color_str("get service\n",ORANGE);
-
-
-		check_int("service done and leave! id:",customer_id,ORANGE);
+		check_int("get service and leave! id:",customer_id,ORANGE);
 	}else{
 		//没有空的椅子,人满了,顾客离开
-		check_int("FULL! cus leave. id:",customer_id,ORANGE);
+		check_int("FULL! customer have to leave. id:",customer_id,ORANGE);
 		my_sem_v(p_mutex);
 	}
 
-	my_process_sleep(1000*ms_per_ticks);
 }
 
 

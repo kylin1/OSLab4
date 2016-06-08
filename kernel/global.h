@@ -31,7 +31,12 @@ EXTERN	GATE		idt[IDT_SIZE];
 EXTERN	u32		k_reenter;
 
 EXTERN	TSS		tss;
+
+//下一个被赋予时间片执行的进程
 EXTERN	PROCESS*	p_proc_ready;
+
+//系统的就绪进程队列
+EXTERN	LIST*	runnable_list;
 
 EXTERN	int		nr_current_console;
 

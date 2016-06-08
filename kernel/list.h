@@ -36,6 +36,9 @@ typedef struct semaphore {
 void list_add (LIST* list, PROCESS * new_proc);
 
 void list_remove(LIST* list);
+void list_remove_last(LIST *list);
+void list_remove2(LIST *list, PROCESS *to_delete);
+void print_list(LIST *list);
 
 void show_list(LIST* list);
 

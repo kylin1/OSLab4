@@ -106,14 +106,14 @@
 
 //进程状态
 
-//睡眠,登台状态
+//睡眠,等待状态
 #define SLEEP     1
 
 //等待信号结束,或者时间片使用完的的就绪状态
 #define RUNNABLE     2
 
 //一秒100次,也就是10ms时钟中断一次,一个时间片也就是10ms
-#define HZ             1  /* clock freq (software settable on IBM-PC) */
+#define HZ             100  /* clock freq (software settable on IBM-PC) */
 
 //一个时间片的时间长度
 int ms_per_ticks;

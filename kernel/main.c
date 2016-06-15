@@ -64,23 +64,27 @@ PRIVATE void clear_screen() {
 	int i;
 	disp_pos = 0;
 	for (i = 0; i < 80 * 20; i++) {
-		disp_color_str(" ",GREY);
+		my_disp_str(" ",GREY);
 	}
 	disp_pos = 0;
 }
 
 PRIVATE void show_process_name(int color){
-	disp_color_str("\n",color);
-	disp_color_str("process name : ",color);
-	disp_color_str(p_proc_ready->p_name,color);
+	my_disp_str("\n",color);
+	my_disp_str("process name : ",color);
+	my_disp_str(p_proc_ready->p_name,color);
 }
 
 
 PUBLIC void check_int(char * str,int input,int color){
-	disp_color_str(" ",color);
-	disp_color_str(str,color);
-	disp_int(input,color);
-	disp_color_str(" \n",color);
+	my_disp_str(" ",color);
+	my_disp_str(str,color);
+
+	char output[16];
+	itoa(output, input);
+	my_disp_str(output,color);
+
+	my_disp_str(" \n",color);
 }
 
 /*======================================================================*
@@ -221,9 +225,8 @@ void disp_ticks() {
 void TestA() {
 	while (1) {
 		//普通进程、理发师进程和顾客进程用不同颜色打印
-//		my_process_sleep(1000*ms_per_ticks);
+		my_disp_str(" Normal ",WHITE);
 		delay_ticks(TIME);
-		disp_color_str(" Normal ",WHITE);
 	}
 }
 
@@ -234,14 +237,14 @@ void TaskB() {
 	while (1) {
 		//普通进程、理发师进程和顾客进程用不同颜色打印
 		if(DEBUG){
-			disp_color_str("~~~BB start",GREEN);
+			my_disp_str("~~~BB start",GREEN);
 		}
 
 		//申请顾客customers-1,判断是否有顾客,无顾客,理发师去睡觉
 		my_sem_p(p_customers);
 
 		//运行至此,说明被顾客唤醒,打印基本操作:理发师剪发
-		disp_color_str("barber is waked up by customer",GREEN);
+		my_disp_str("barber is waked up by customer",GREEN);
 
 		/*-----------进入临界区 mutex-1-----------*/
 		my_sem_p(p_mutex);
@@ -254,14 +257,15 @@ void TaskB() {
 		my_sem_v(p_mutex);
 		/*-----------退出临界区 mutex+1-----------*/
 
-		disp_color_str(" & cutting some hair\n",GREEN);
+		my_disp_str(" & cutting some hair\n",GREEN);
 
 		// 理发师理发消耗
 		my_process_sleep(TIME*ms_per_ticks);
 		my_process_sleep(TIME*ms_per_ticks);
 
+
 		if(DEBUG){
-			disp_color_str(" BB sleep end~~~\n",GREEN);
+			my_disp_str(" BB sleep end~~~\n",GREEN);
 		}
 	}
 }
@@ -270,10 +274,8 @@ void TaskB() {
  * 顾客共同的进程作业
  */
 void customer_same(int customer_id){
-	my_process_sleep(TIME*ms_per_ticks);
-
 	if(DEBUG){
-		disp_color_str("~~~cus start",ORANGE);
+		my_disp_str("~~~cus start",ORANGE);
 	}
 
 	/*-----------进入临界区 mutex-1-----------*/
@@ -299,6 +301,7 @@ void customer_same(int customer_id){
 		check_int("FULL! customer have to leave. id:",customer_id,ORANGE);
 		my_sem_v(p_mutex);
 	}
+	my_process_sleep(TIME*ms_per_ticks);
 
 }
 

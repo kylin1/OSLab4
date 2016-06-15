@@ -119,10 +119,11 @@
 int ms_per_ticks;
 
 
-#define CHAIR_NUM  3
+#define CHAIR_NUM  2
 
 #define DEBUG  0
-#define TIME  1000
+
+#define TIME  500
 
 
 

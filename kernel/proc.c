@@ -31,34 +31,24 @@ PUBLIC void schedule() {
 	PROCESS* p;
 	//调整按照时间片睡眠进程的睡眠时间
 	for(p = proc_table; p < proc_table+NR_TASKS; p++){
-		if(p->sleep_ticks > 0 && p->state == SLEEP){
+		if(p->state == SLEEP && p->sleep_ticks > 0){
 			p->sleep_ticks--;
 		}
 		//睡眠时间到了,可以被唤醒
-		else if(p->sleep_ticks <= 0 && p->state == SLEEP){
+		else if(p->state == SLEEP && p->sleep_ticks <= 0){
 			p->state = RUNNABLE;
 		}
 	}
 
-	//找到下一个是可运行状态的进程
-	do{
-		//首先要切换到下一个进程
+	//首先要切换到下一个进程
+	change_proc();
+
+	//如果这个进程不是可运行的,则继续切换
+	while(p_proc_ready->state != RUNNABLE){
+		//找到下一个是可运行状态的进程
 		change_proc();
+	}
 
-		//如果这个进程不是可运行的,则继续切换
-		if(p_proc_ready->state != RUNNABLE){
-			continue;
-		}
-
-		//睡眠时间片大于0,表明这个进程需要睡觉,则继续切换
-	}while(p_proc_ready->sleep_ticks > 0);
-//
-//	//将当前进程移到就绪队列的末尾
-//	list_add(runnable_list,p_proc_ready);
-//
-//	//从就绪队列中取出第一个可运行的进程
-//	p_proc_ready = runnable_list->first;
-//	list_remove(runnable_list);
 }
 
 /*======================================================================*
@@ -110,14 +100,9 @@ void sys_sem_p(){
 
 		//则调用此方法的进程阻塞自己,设置自己为等待此信号量状态
 		PROCESS * proc_tobe_sleep = p_proc_ready;
-//
-//		disp_color_str(" before list_remove2",ORANGE);
-//		print_list(runnable_list);
+		
 		//从就绪队列中移走
 //		list_remove2(runnable_list,proc_tobe_sleep);
-//		list_remove_last(runnable_list);
-//		disp_color_str(" after list_remove2",ORANGE);
-//		print_list(runnable_list);
 
 		//无限睡眠直到被唤醒
 		proc_tobe_sleep->state = SLEEP;

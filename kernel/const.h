@@ -123,7 +123,7 @@ int ms_per_ticks;
 
 #define DEBUG  0
 
-#define TIME  500
+#define TICKS_NUM  500
 
 
 

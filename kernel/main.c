@@ -226,7 +226,7 @@ void TestA() {
 	while (1) {
 		//普通进程、理发师进程和顾客进程用不同颜色打印
 		my_disp_str(" Normal ",WHITE);
-		delay_ticks(TIME);
+		delay_ticks(TICKS_NUM);
 	}
 }
 
@@ -260,8 +260,8 @@ void TaskB() {
 		my_disp_str(" & cutting some hair\n",GREEN);
 
 		// 理发师理发消耗
-		my_process_sleep(TIME*ms_per_ticks);
-		my_process_sleep(TIME*ms_per_ticks);
+		my_process_sleep(TICKS_NUM*ms_per_ticks);
+		my_process_sleep(TICKS_NUM*ms_per_ticks);
 
 
 		if(DEBUG){
@@ -301,7 +301,7 @@ void customer_same(int customer_id){
 		check_int("FULL! customer have to leave. id:",customer_id,ORANGE);
 		my_sem_v(p_mutex);
 	}
-	my_process_sleep(TIME*ms_per_ticks);
+	my_process_sleep(TICKS_NUM*ms_per_ticks);
 
 }
 
